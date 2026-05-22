@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="托猪所联盟 · 智猪乡盟 — 找地建农场，改造闲置养殖场，共建智能化家庭农场">
+  <title>智猪乡盟 · 托猪所联盟</title>
+  <link rel="stylesheet" href="public/css/style.css">
+  <style>
+    .tag-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag-option {
+      flex: 1; min-width: 100px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+      color: var(--text-gray);
+      user-select: none;
+    }
+    .tag-option:hover { border-color: var(--green-accent); }
+    .tag-option.selected {
+      border-color: var(--green-mid);
+      background: var(--green-light);
+      color: var(--green-dark);
+    }
+    .tag-option .tag-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+    .hint-box {
+      background: #FFF8E1;
+      border: 1px solid #FFE082;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #795548;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+  <div class="header-logo">
+    <div style="width:32px;height:32px;background:var(--green-accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">🐷</div>
+    <span>智猪乡盟</span>
+  </div>
+  <nav class="header-nav">
+    <a href="javascript:;" data-page="home" onclick="switchPage('home')" class="active">首页</a>
+    <a href="javascript:;" data-page="submit" onclick="switchPage('submit')">收录</a>
+    <a href="javascript:;" data-page="list" onclick="switchPage('list')">列表</a>
+    <a href="javascript:;" data-page="about" onclick="switchPage('about')">关于</a>
+  </nav>
+</header>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== 首页 ===== -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-icon">🏘️</div>
+    <h1>帮村里闲置的地找到好项目</h1>
+    <p>托猪所联盟 — 专找适合建智能化家庭农场的土地。<br>不管是废弃猪场需要改造，还是村里有空地适合新建，我们都来！<br>村集体以地入股，每年稳定分红。</p>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="num" id="stat-total">-</div>
+      <div class="label">已收录场地</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-area">-</div>
+      <div class="label">合计面积</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-prov">-</div>
+      <div class="label">覆盖省份</div>
+    </div>
+  </div>
+
+  <div class="cta-block">
+    <h3>🐖 你们村有合适的场地吗？</h3>
+    <p>✅ 闲置废弃的猪场，我们来改造<br>✅ 适合建农场的空地，我们来建<br>10-30 亩均可！村集体入股，每年分红。</p>
+    <button class="btn btn-primary" onclick="switchPage('submit')">📋 立即提交场地</button>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="icon">🏚️</div>
+      <div class="text">
+        <h4>闲置猪场改造</h4>
+        <p>老旧、环保不达标的猪场，我们负责改造升级，搭载智能设备重新投产</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🌱</div>
+      <div class="text">
+        <h4>空地新建 GROW 农场</h4>
+        <p>有地就能建！90 天整装车快速建成，标准化智能家庭农场一步到位</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🤝</div>
+      <div class="text">
+        <h4>代养合作</h4>
+        <p>正大集团包猪苗、饲料、收购，固定代养费，不受猪价波动影响</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🏘️</div>
+      <div class="text">
+        <h4>村集体分红</h4>
+        <p>村集体持股 49%，养殖利润对半分，村民不用亲自养猪也能分红</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 提交页 ===== -->
+<div class="page" id="page-submit">
+  <h2 style="font-size:20px;color:var(--green-dark);margin-bottom:4px;">📋 提交场地信息</h2>
+  <p style="font-size:14px;color:var(--text-gray);margin-bottom:16px;">填得越详细，评估越快。我们会尽快与您联系。</p>
+
+  <form id="submit-form" enctype="multipart/form-data">
+    <!-- 提交类型 -->
+    <div class="form-section">
+      <h3>🎯 您想提交什么类型的场地？</h3>
+      <div class="form-group">
+        <div class="tag-group" id="land-type-group">
+          <div class="tag-option" data-value="改造" onclick="selectType(this)">
+            <span class="tag-icon">🏚️</span>闲置猪场改造
+          </div>
+          <div class="tag-option" data-value="新建" onclick="selectType(this)">
+            <span class="tag-icon">🌱</span>空地新建农场
+          </div>
+          <div class="tag-option" data-value="两者皆可" onclick="selectType(this)">
+            <span class="tag-icon">✅</span>两者皆可
+          </div>
+        </div>
+        <input type="hidden" id="landType" name="landType" value="">
+      </div>
+    </div>
+
+    <!-- 联系信息 -->
+    <div class="form-section">
+      <h3>📞 联系信息</h3>
+      <div class="form-group">
+        <label>您的姓名 / 身份 <span class="required">*</span></label>
+        <input type="text" id="name" name="name" placeholder="如：李村支书 / 张村民 / 王合作社负责人" required>
+        <div class="error-text">请填写您的姓名</div>
+      </div>
+      <div class="form-group">
+        <label>联系电话 <span class="required">*</span></label>
+        <input type="tel" id="phone" name="phone" placeholder="请输入手机号码" required>
+        <div class="error-text">请填写联系电话</div>
+      </div>
+    </div>
+
+    <!-- 场地位置 -->
+    <div class="form-section">
+      <h3>📍 场地位置</h3>
+      <div class="form-group">
+        <label>省份 <span class="required">*</span></label>
+        <input type="text" id="province" name="province" placeholder="如：湖南省" required>
+        <div class="error-text">请填写省份</div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>城市</label>
+          <input type="text" id="city" name="city" placeholder="如：益阳市">
+        </div>
+        <div class="form-group">
+          <label>县/区 <span class="required">*</span></label>
+          <input type="text" id="county" name="county" placeholder="如：桃江县" required>
+          <div class="error-text">请填写县/区</div>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>镇/乡</label>
+          <input type="text" id="town" name="town" placeholder="如：牛田镇">
+        </div>
+        <div class="form-group">
+          <label>村 / 具体地点</label>
+          <input type="text" id="village" name="village" placeholder="如：大冲里村">
+        </div>
+      </div>
+    </div>
+
+    <!-- 土地基本信息 -->
+    <div class="form-section">
+      <h3>📐 土地基本信息</h3>
+      <div class="form-group">
+        <label>土地面积（亩）<span class="required">*</span> <span class="hint">10-30 亩均可，15-20 亩最优</span></label>
+        <input type="number" id="area" name="area" min="5" max="100" step="0.1" placeholder="请输入面积" required>
+        <div class="area-display" id="area-display">请输入面积</div>
+        <div class="hint-box">💡 益阳看地经验：18-42 亩范围内都有成功案例。15-20 亩是 GROW 单场最优规模，稍大或稍小也可评估。</div>
+        <div class="error-text">请填写面积，建议 10-30 亩</div>
+      </div>
+      <div class="form-group">
+        <label>土地形状</label>
+        <select name="landShape">
+          <option value="">请选择</option>
+          <option value="矩形">矩形 — 规整好布局</option>
+          <option value="不规则矩形">不规则矩形 — 基本可用</option>
+          <option value="不规则">不规则 — 需评估</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>土地持有人 <span class="required">*</span></label>
+        <select id="landHolder" name="landHolder" required>
+          <option value="">请选择</option>
+          <option value="村集体">村集体</option>
+          <option value="集体（个人承包）">集体（个人承包）</option>
+          <option value="个人">个人</option>
+          <option value="合作社">合作社</option>
+          <option value="其他">其他</option>
+        </select>
+        <div class="error-text">请选择土地持有人</div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>土地性质 <span class="required">*</span></label>
+          <select id="landNature" name="landNature" required>
+            <option value="">请选择</option>
+            <option value="设施农业用地">设施农业用地</option>
+            <option value="农用地">农用地</option>
+            <option value="林地">林地</option>
+            <option value="林地（政府可配合调规）">林地（政府可配合调规）</option>
+            <option value="建设用地">建设用地</option>
+            <option value="其他">其他</option>
+          </select>
+          <div class="error-text">请选择土地性质</div>
+        </div>
+        <div class="form-group">
+          <label>目前状态 <span class="required">*</span></label>
+          <select id="status" name="status" required>
+            <option value="">请选择</option>
+            <option value="闲置">闲置 — 暂无经营</option>
+            <option value="废弃">废弃 — 已荒废</option>
+            <option value="待开发">待开发 — 未利用</option>
+            <option value="个人经营">个人经营 — 有意改造</option>
+            <option value="运营中">运营中 — 有意合作</option>
+          </select>
+          <div class="error-text">请选择目前状态</div>
+        </div>
+      </div>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label>通水</label>
+          <select name="water">
+            <option value="否">否</option>
+            <option value="是">是</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>通电</label>
+          <select name="electricity">
+            <option value="否">否</option>
+            <option value="是" selected>是</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>通路</label>
+          <select name="road">
+            <option value="否">否</option>
+            <option value="是" selected>是</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 详细评估信息 -->
+    <div class="form-section">
+      <h3>🔍 详细评估信息 <span class="hint">选填，填得越详细评估越快</span></h3>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>是否测绘过</label>
+          <select name="surveyed">
+            <option value="">未填写</option>
+            <option value="已测绘">已测绘 — 有图纸</option>
+            <option value="未测绘">未测绘</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>有无其他猪场</label>
+          <select name="hasOtherFarm">
+            <option value="">未填写</option>
+            <option value="无">无</option>
+            <option value="有">有 — 周边有其他养殖场</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>土地/场地叫价意向</label>
+        <select name="priceExpectation">
+          <option value="">未填写</option>
+          <option value="无费用">无费用 — 村集体免费提供</option>
+          <option value="待定面谈">待定面谈</option>
+          <option value="有具体价格">有具体价格</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>场地描述</label>
+        <textarea id="description" name="description" placeholder="场地周边环境、交通情况、水源条件、距离村庄多远、是否靠近主干道等"></textarea>
+      </div>
+    </div>
+
+    <!-- 照片 -->
+    <div class="form-section">
+      <h3>📸 现场照片/航拍 <span class="hint">非必填，有照片评估更快</span></h3>
+      <div class="form-group">
+        <div class="photo-upload" onclick="document.getElementById('photos').click()">
+          <div class="icon">📷</div>
+          <div class="text">点击上传场地照片或航拍图</div>
+        </div>
+        <input type="file" id="photos" name="photos" accept="image/*" multiple style="display:none">
+        <div class="photo-preview" id="photo-preview"></div>
+      </div>
+    </div>
+
+    <!-- 备注 -->
+    <div class="form-section">
+      <h3>📝 备注</h3>
+      <div class="form-group">
+        <textarea id="note" name="note" placeholder="其他想说的… 如：周边村民养猪意愿、政府支持力度、联系人身份等"></textarea>
+      </div>
+    </div>
+
+    <div class="form-submit">
+      <button type="submit" class="btn btn-primary btn-block">✅ 提交信息</button>
+      <p style="text-align:center;font-size:12px;color:var(--text-gray);margin-top:8px;">提交后我们 3 个工作日内联系您安排评估，信息仅用于项目对接</p>
+    </div>
+  </form>
+</div>
+
+<!-- 提交成功弹窗 -->
+<div class="modal-overlay" id="modal-submit">
+  <div class="modal-box">
+    <div class="icon">🎉</div>
+    <h3>提交成功！</h3>
+    <p>感谢您的参与！<br>我们会尽快与您联系，安排实地考察评估。<br>一起把闲置资源变成赚钱资产！</p>
+    <button class="btn btn-primary modal-close-btn" onclick="switchPage('home')">返回首页</button>
+  </div>
+</div>
+
+<!-- ===== 列表页 ===== -->
+<div class="page" id="page-list">
+  <div class="list-header">
+    <h2>🏘️ 已收录场地</h2>
+    <span class="count" id="list-count">加载中...</span>
+  </div>
+  <div id="list-container">
+    <div class="loading"><div class="spinner"></div>加载中...</div>
+  </div>
+</div>
+
+<!-- ===== 关于页 ===== -->
+<div class="page" id="page-about">
+  <div class="about-block">
+    <h3>🐷 什么是托猪所联盟？</h3>
+    <p>
+      托猪所联盟是一个乡村振兴平台——专门寻找适合建设智能化家庭农场的土地资源。
+      不管是闲置废弃猪场需要改造，还是村里有空地适合新建，我们都来评估对接。
+      村集体以地入股，每年稳定分红。
+    </p>
+  </div>
+  <div class="about-block">
+    <h3>🌾 我们在找什么样的场地？</h3>
+    <p><strong>两种类型都欢迎：</strong></p>
+    <ul>
+      <li><strong>闲置/废弃猪场改造</strong> — 原有猪场因环保、设备老旧等原因闲置，可由我们重新改造升级投产</li>
+      <li><strong>适合新建 GROW 农场的土地</strong> — 10-30 亩，设施农业用地或可调规的林地/农用地，交通便利</li>
+    </ul>
+    <p style="margin-top:8px;">最优规模：15-20 亩（2400 头育肥场），但 10-30 亩范围内都可根据实际情况评估。</p>
+  </div>
+  <div class="about-block">
+    <h3>✅ 提交后会发生什么？</h3>
+    <ul>
+      <li>我们收到信息后 3 个工作日内与您联系</li>
+      <li>安排现场实地考察、测绘评估</li>
+      <li>符合条件则对接改造/建设方案</li>
+      <li>村集体以土地入股，享受每年分红</li>
+    </ul>
+  </div>
+  <div class="about-block">
+    <h3>🤝 核心合作方</h3>
+    <p>
+      🏗️ <strong>驷牧集团 · GROW 品牌农场</strong> — 标准化智能家庭农场，提供整装车建设、代养对接与运营管理<br>
+      🐖 <strong>正大集团</strong> — 代养合作方，提供猪苗、饲料、收购全链条支持
+    </p>
+  </div>
+  <div class="about-block" style="text-align:center;">
+    <p style="color:var(--green-dark);font-weight:500;">乡建DAO · 托猪所联盟 · 智猪乡盟</p>
+    <p style="font-size:13px;">联系人：Ben · ben.leexin@gmail.com</p>
+    <p style="font-size:12px;color:var(--text-gray);margin-top:8px;">
+      都昌已运营 ✓ 益阳 100 场签约 ✓ 惠东对接中 ✓ 安庆推进中
+    </p>
+  </div>
+</div>
+
+<!-- ===== 底部导航栏 ===== -->
+<div class="tabbar">
+  <div class="tabbar-item active" data-page="home" onclick="switchPage('home')">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">首页</span>
+  </div>
+  <div class="tabbar-item" data-page="submit" onclick="switchPage('submit')">
+    <span class="tab-icon">📋</span>
+    <span class="tab-label">收录</span>
+  </div>
+  <div class="tabbar-item" data-page="list" onclick="switchPage('list')">
+    <span class="tab-icon">🏘️</span>
+    <span class="tab-label">列表</span>
+  </div>
+  <div class="tabbar-item" data-page="about" onclick="switchPage('about')">
+    <span class="tab-icon">ℹ️</span>
+    <span class="tab-label">关于</span>
+  </div>
+</div>
+
+<script>
+// 标签选择
+function selectType(el) {
+  document.querySelectorAll('#land-type-group .tag-option').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('landType').value = el.dataset.value;
+}
+
+// 主逻辑
+document.addEventListener('DOMContentLoaded', () => {
+  // 面积验证
+  const areaInput = document.getElementById('area');
+  const areaDisplay = document.getElementById('area-display');
+  if (areaInput && areaDisplay) {
+    areaInput.addEventListener('input', () => {
+      const v = parseFloat(areaInput.value);
+      if (v) {
+        let msg = v + ' 亩';
+        if (v >= 15 && v <= 20) msg += ' ✅ 最优规模';
+        else if (v >= 10 && v <= 30) msg += ' 👍 可评估';
+        else msg += ' ⚠️ 偏大或偏小，需单独评估';
+        areaDisplay.textContent = msg;
+        areaDisplay.style.color = (v >= 10 && v <= 30) ? 'var(--green-mid)' : '#E86C00';
+      } else {
+        areaDisplay.textContent = '请输入面积';
+        areaDisplay.style.color = 'var(--text-gray)';
+      }
+    });
+  }
+
+  // 照片上传预览
+  const photoInput = document.getElementById('photos');
+  const preview = document.getElementById('photo-preview');
+  if (photoInput && preview) {
+    photoInput.addEventListener('change', () => {
+      preview.innerHTML = '';
+      Array.from(photoInput.files).slice(0, 5).forEach(f => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(f);
+      });
+    });
+  }
+
+  // 表单提交
+  const form = document.getElementById('submit-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('.btn');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+
+      document.querySelectorAll('.form-group.error').forEach(el => el.classList.remove('error'));
+      let hasError = false;
+
+      const landType = document.getElementById('landType');
+      const name = document.getElementById('name');
+      const phone = document.getElementById('phone');
+      const province = document.getElementById('province');
+      const county = document.getElementById('county');
+      const area = document.getElementById('area');
+      const landHolder = document.getElementById('landHolder');
+      const landNature = document.getElementById('landNature');
+      const status = document.getElementById('status');
+
+      if (!landType.value) { showToast('请选择场地类型', true); hasError = true; }
+      if (!name.value.trim()) { name.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!phone.value.trim()) { phone.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!province.value.trim()) { province.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!county.value.trim()) { county.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!area.value || parseFloat(area.value) < 5) { area.closest('.form-group').classList.add('error'); showToast('请填写面积', true); hasError = true; }
+      if (!landHolder.value) { landHolder.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!landNature.value) { landNature.closest('.form-group').classList.add('error'); hasError = true; }
+      if (!status.value) { status.closest('.form-group').classList.add('error'); hasError = true; }
+
+      if (hasError) { btn.disabled = false; btn.textContent = '提交信息'; return; }
+
+      try {
+        const fd = new FormData(form);
+        const res = await fetch('/api/submit', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('modal-submit').classList.add('show');
+          form.reset();
+          document.querySelectorAll('#land-type-group .tag-option').forEach(e => e.classList.remove('selected'));
+          if (preview) preview.innerHTML = '';
+          if (areaDisplay) { areaDisplay.textContent = '请输入面积'; areaDisplay.style.color = 'var(--text-gray)'; }
+        } else {
+          showToast(data.message || '提交失败', true);
+        }
+      } catch (err) {
+        showToast('网络错误，请稍后再试', true);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '提交信息';
+      }
+    });
+  }
+
+  // 弹窗关闭
+  document.querySelectorAll('.modal-close-btn').forEach(btn => {
+    btn.addEventListener('click', () => document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show')));
+  });
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+  });
+
+  // 初始
+  window.switchPage('home');
+});
+</script>
+
+<script src="public/js/app.js"></script>
+</body>
+</html>

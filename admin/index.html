@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智猪乡盟 · 管理后台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F5F5F0; color: #1A1A1A; padding: 20px; }
+    h1 { color: #0B4F3A; font-size: 22px; margin-bottom: 4px; }
+    .sub { color: #666; font-size: 14px; margin-bottom: 20px; }
+    .stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat-box { background: #fff; border-radius: 10px; padding: 14px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .stat-box .n { font-size: 28px; font-weight: 800; color: #1D9E75; }
+    .stat-box .l { font-size: 13px; color: #666; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-size: 13px; }
+    th { background: #0B4F3A; color: #fff; padding: 10px 8px; text-align: left; font-weight: 600; }
+    td { padding: 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+    tr:hover td { background: #F0FFF8; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: #E1F5EE; color: #0B4F3A; }
+    .badge-done { background: #1D9E75; color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; background: #1D9E75; color: #fff; }
+    .btn-sm:hover { background: #0B4F3A; }
+    .btn-sm:disabled { opacity: 0.5; cursor: default; }
+    .err { color: #C0392B; padding: 20px; text-align: center; }
+    .search-bar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .search-bar input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; flex: 1; min-width: 200px; }
+    .search-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+    @media (max-width: 768px) { table { font-size: 12px; } th, td { padding: 6px 4px; } }
+  </style>
+</head>
+<body>
+  <h1>🐷 智猪乡盟 · 管理后台</h1>
+  <p class="sub">托猪所联盟 — 养殖场收录数据管理</p>
+  <div class="stats" id="stats"></div>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="搜索地区/姓名/电话..." oninput="filterTable()">
+    <select id="filterStatus" onchange="filterTable()">
+      <option value="">全部状态</option>
+      <option value="false">未联系</option>
+      <option value="true">已联系</option>
+    </select>
+    <button class="btn-sm" onclick="exportCSV()">📥 导出CSV</button>
+  </div>
+  <div id="table-container">
+    <div style="text-align:center;padding:40px;color:#666;">加载中...</div>
+  </div>
+
+  <script>
+    const token = new URLSearchParams(location.search).get('token') || '';
+
+    async function loadData() {
+      try {
+        const res = await fetch(`/api/admin/all?token=${token}`);
+        if (!res.ok) throw new Error('unauthorized');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+        render(data.submissions);
+      } catch (e) {
+        document.getElementById('table-container').innerHTML = `<div class="err">❌ 加载失败：${e.message}<br><br>请确认 URL 中包含正确的 token 参数</div>`;
+      }
+    }
+
+    let allData = [];
+
+    function render(submissions) {
+      allData = submissions;
+      const total = submissions.length;
+      const areas = submissions.reduce((s, i) => s + i.area, 0);
+      const provs = [...new Set(submissions.map(i => i.province))].length;
+      const contacted = submissions.filter(i => i.contacted).length;
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat-box"><div class="n">${total}</div><div class="l">总收录</div></div>
+        <div class="stat-box"><div class="n">${Math.round(areas)}亩</div><div class="l">合计面积</div></div>
+        <div class="stat-box"><div class="n">${provs}</div><div class="l">覆盖省份</div></div>
+        <div class="stat-box"><div class="n">${contacted}</div><div class="l">已联系</div></div>
+      `;
+      filterTable();
+    }
+
+    function filterTable() {
+      const q = document.getElementById('search').value.toLowerCase();
+      const st = document.getElementById('filterStatus').value;
+      let filtered = allData.filter(i => {
+        const txt = `${i.name}${i.phone}${i.province}${i.city}${i.county}${i.town}${i.village}`.toLowerCase();
+        const matchSearch = !q || txt.includes(q);
+        const matchStatus = st === '' || i.contacted === (st === 'true');
+        return matchSearch && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        document.getElementById('table-container').innerHTML = '<div style="text-align:center;padding:40px;color:#666;">暂无匹配数据</div>';
+        return;
+      }
+
+      const typeMap = { '改造': '🏚️改造', '新建': '🌱新建', '两者皆可': '✅两者' };
+      let html = `<table><thead><tr><th>时间</th><th>类型</th><th>地区</th><th>面积</th><th>土地信息</th><th>持有人</th><th>通水电</th><th>联系人</th><th>电话</th><th>备注</th><th>操作</th></tr></thead><tbody>`;
+      filtered.forEach(s => {
+        html += `<tr>
+          <td>${s.createdAt.slice(0, 10)}</td>
+          <td>${typeMap[s.landType] || s.landType || '-'}</td>
+          <td>${s.province} ${s.city} ${s.county}<br>${s.town || ''} ${s.village || ''}</td>
+          <td>${s.area}亩</td>
+          <td style="font-size:12px">${s.landNature || '-'}<br>${s.landShape || ''} ${s.surveyed ? '| ' + s.surveyed : ''}</td>
+          <td style="font-size:12px">${s.landHolder || '-'}<br>${s.hasOtherFarm ? '周边:' + s.hasOtherFarm : ''}${s.priceExpectation ? '|叫价:' + s.priceExpectation : ''}</td>
+          <td style="font-size:11px">💧${s.water ? '✓' : '✗'} ⚡${s.electricity ? '✓' : '✗'} 🚗${s.road ? '✓' : '✗'}</td>
+          <td>${s.name}</td>
+          <td style="font-size:12px">${s.phone}</td>
+          <td style="font-size:11px">${(s.description || '').slice(0, 15)}${s.description?.length > 15 ? '...' : ''}</td>
+          <td>${s.contacted
+            ? '<span class="badge badge-done">已联系</span>'
+            : `<button class="btn-sm" onclick="markContacted('${s.id}')">标记已联系</button>`
+          }</td>
+        </tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('table-container').innerHTML = html;
+    }
+
+    async function markContacted(id) {
+      const res = await fetch(`/api/admin/contacted?token=${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (data.success) loadData();
+    }
+
+    function exportCSV() {
+      const headers = ['提交时间', '类型', '省份', '城市', '县区', '乡镇', '村', '面积(亩)', '土地形状', '土地持有人', '土地性质', '状态', '是否测绘', '有无其他猪场', '叫价意向', '通水', '通电', '通路', '姓名', '电话', '场地描述', '备注', '已联系'];
+      const rows = allData.map(s => [
+        s.createdAt.slice(0, 10), s.landType || '', s.province, s.city, s.county, s.town, s.village,
+        s.area, s.landShape || '', s.landHolder || '', s.landNature || '', s.status, s.surveyed || '', s.hasOtherFarm || '', s.priceExpectation || '',
+        s.water ? '是' : '否', s.electricity ? '是' : '否', s.road ? '是' : '否',
+        s.name, s.phone, `"${(s.description || '').replace(/"/g, '""')}"`, `"${(s.note || '').replace(/"/g, '""')}"`,
+        s.contacted ? '是' : '否'
+      ]);
+      const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `智猪乡盟_收录数据_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
