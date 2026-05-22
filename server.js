@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 3001;
 // ------- 数据存储 -------
 const DATA_FILE = path.join(__dirname, 'data', 'submissions.json');
 const ensureDataFile = () => {
+  const dir = path.dirname(DATA_FILE);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (!fs.existsSync(DATA_FILE)) {
     fs.writeFileSync(DATA_FILE, JSON.stringify({ submissions: [] }, null, 2));
   }
