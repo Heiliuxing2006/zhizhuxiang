@@ -78,19 +78,19 @@ body {
 
 /* ── 首页 Hero ── */
 .hero {
-  text-align: center;
+  text-align: left;
   padding: 32px 16px 24px;
 }
 .hero-icon {
   font-size: 56px;
   margin-bottom: 12px;
+  text-align: center;
 }
 .hero h1 {
   font-size: 26px;
   color: var(--green-dark);
   font-weight: 800;
   margin-bottom: 8px;
-  text-wrap: balance;
 }
 .hero p {
   font-size: 15px;
