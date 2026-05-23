@@ -371,6 +371,7 @@
         </div>
         <input type="file" id="photos" name="photos" accept="image/*" multiple style="display:none">
         <div class="photo-preview" id="photo-preview"></div>
+        <div style="font-size:12px;color:var(--text-gray);margin-top:6px;text-align:center;">最多5张，点击照片可删除</div>
       </div>
     </div>
 
@@ -567,21 +568,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 照片上传预览
+  // 照片上传预览（支持追加和删除）
   const photoInput = document.getElementById('photos');
   const preview = document.getElementById('photo-preview');
+  let selectedFiles = [];
+
+  function renderPreview() {
+    if (!preview) return;
+    preview.innerHTML = '';
+    selectedFiles.forEach((file, i) => {
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position:relative;display:inline-block;';
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        wrapper.appendChild(img);
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.textContent = '✕';
+        delBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:none;background:#E74C3C;color:#fff;font-size:12px;line-height:22px;text-align:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.3);';
+        delBtn.onclick = () => {
+          selectedFiles.splice(i, 1);
+          renderPreview();
+        };
+        wrapper.appendChild(delBtn);
+      };
+      reader.readAsDataURL(file);
+      preview.appendChild(wrapper);
+    });
+  }
+
   if (photoInput && preview) {
     photoInput.addEventListener('change', () => {
-      preview.innerHTML = '';
-      Array.from(photoInput.files).slice(0, 5).forEach(f => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(f);
-      });
+      const newFiles = Array.from(photoInput.files);
+      const remaining = 5 - selectedFiles.length;
+      if (newFiles.length > remaining) {
+        showToast('最多上传5张照片', true);
+      }
+      newFiles.slice(0, remaining).forEach(f => selectedFiles.push(f));
+      renderPreview();
+      photoInput.value = '';
     });
   }
 
@@ -621,6 +650,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         const fd = new FormData(form);
+        // 替换照片文件（input已清空，用selectedFiles）
+        fd.delete('photos');
+        selectedFiles.forEach(f => fd.append('photos', f));
         const res = await fetch('/api/submit', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.success) {
@@ -628,6 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
           form.reset();
           document.querySelectorAll('#land-type-group .tag-option').forEach(e => e.classList.remove('selected'));
           if (preview) preview.innerHTML = '';
+          selectedFiles = [];
           if (areaDisplay) { areaDisplay.textContent = '请输入面积'; areaDisplay.style.color = 'var(--text-gray)'; }
         } else {
           showToast(data.message || '提交失败', true);
