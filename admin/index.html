@@ -22,6 +22,11 @@
     .btn-sm { padding: 4px 10px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; background: #1D9E75; color: #fff; }
     .btn-sm:hover { background: #0B4F3A; }
     .btn-sm:disabled { opacity: 0.5; cursor: default; }
+    .photo-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd; }
+    .photo-thumb:hover { opacity: 0.8; }
+    .modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; padding:20px; }
+    .modal.show { display:flex; }
+    .modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
     .err { color: #C0392B; padding: 20px; text-align: center; }
     .search-bar { margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
     .search-bar input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; flex: 1; min-width: 200px; }
@@ -95,7 +100,7 @@
       }
 
       const typeMap = { '改造': '🏚️改造', '新建': '🌱新建', '两者皆可': '✅两者' };
-      let html = `<table><thead><tr><th>时间</th><th>类型</th><th>地区</th><th>面积</th><th>土地信息</th><th>持有人</th><th>通水电</th><th>联系人</th><th>电话</th><th>备注</th><th>操作</th></tr></thead><tbody>`;
+      let html = `<table><thead><tr><th>时间</th><th>类型</th><th>地区</th><th>面积</th><th>土地信息</th><th>持有人</th><th>通水电</th><th>照片</th><th>联系人</th><th>电话</th><th>备注</th><th>操作</th></tr></thead><tbody>`;
       filtered.forEach(s => {
         html += `<tr>
           <td>${s.createdAt.slice(0, 10)}</td>
@@ -105,6 +110,7 @@
           <td style="font-size:12px">${s.landNature || '-'}<br>${s.landShape || ''} ${s.surveyed ? '| ' + s.surveyed : ''}</td>
           <td style="font-size:12px">${s.landHolder || '-'}<br>${s.hasOtherFarm ? '周边:' + s.hasOtherFarm : ''}${s.priceExpectation ? '|叫价:' + s.priceExpectation : ''}</td>
           <td style="font-size:11px">💧${s.water ? '✓' : '✗'} ⚡${s.electricity ? '✓' : '✗'} 🚗${s.road ? '✓' : '✗'}</td>
+          <td>${(s.photos || []).length > 0 ? s.photos.map(p => '<img class="photo-thumb" src="' + p + '" onclick="viewPhoto(\'' + p + '\')">').join('') : '-'}</td>
           <td>${s.name}</td>
           <td style="font-size:12px">${s.phone}</td>
           <td style="font-size:11px">${(s.description || '').slice(0, 15)}${s.description?.length > 15 ? '...' : ''}</td>
@@ -145,7 +151,18 @@
       a.click();
     }
 
+    function viewPhoto(url) {
+      const m = document.getElementById('photo-modal');
+      const img = m.querySelector('img');
+      img.src = url;
+      m.classList.add('show');
+    }
+
     loadData();
   </script>
+
+  <div class="modal" id="photo-modal" onclick="this.classList.remove('show')">
+    <img src="" alt="照片预览">
+  </div>
 </body>
 </html>
