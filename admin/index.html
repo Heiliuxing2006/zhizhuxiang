@@ -116,8 +116,8 @@
           <td style="font-size:11px">${(s.description || '').slice(0, 15)}${s.description?.length > 15 ? '...' : ''}</td>
           <td>${s.contacted
             ? '<span class="badge badge-done">已联系</span>'
-            : `<button class="btn-sm" onclick="markContacted('${s.id}')">标记已联系</button>`
-          }</td>
+            : '<button class="btn-sm" onclick="markContacted(\'' + s.id + '\')">标记已联系</button>'
+          }<br><button class="btn-sm" style="background:#C0392B;margin-top:4px" onclick="deleteItem(\'' + s.id + '\')">🗑 删除</button></td>
         </tr>`;
       });
       html += '</tbody></table>';
@@ -149,6 +149,21 @@
       a.href = URL.createObjectURL(blob);
       a.download = `智猪侠_收录数据_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('确认删除该条记录？此操作不可恢复。')) return;
+      const res = await fetch(`/api/admin/delete?token=${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadData();
+      } else {
+        alert('删除失败');
+      }
     }
 
     function viewPhoto(url) {

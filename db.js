@@ -169,4 +169,20 @@ async function markContacted(id) {
   return false;
 }
 
-module.exports = { init, getAll, getList, getTotal, addSubmission, markContacted, useDb };
+// ── 删除提交 ──
+async function deleteSubmission(id) {
+  if (useDb) {
+    const result = await pool.query('DELETE FROM submissions WHERE id = $1', [id]);
+    return result.rowCount > 0;
+  }
+  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  const idx = data.submissions.findIndex(s => s.id === id);
+  if (idx !== -1) {
+    data.submissions.splice(idx, 1);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    return true;
+  }
+  return false;
+}
+
+module.exports = { init, getAll, getList, getTotal, addSubmission, markContacted, deleteSubmission, useDb };

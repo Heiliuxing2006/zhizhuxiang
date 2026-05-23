@@ -164,6 +164,26 @@ app.post('/api/admin/contacted', async (req, res) => {
   }
 });
 
+// 管理员：删除提交
+app.post('/api/admin/delete', async (req, res) => {
+  const token = req.query.token;
+  if (token !== 'zhizhuxiang2026') {
+    return res.status(401).json({ success: false, message: 'unauthorized' });
+  }
+  try {
+    const { id } = req.body;
+    const ok = await store.deleteSubmission(id);
+    if (ok) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ success: false, message: 'not found' });
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
+});
+
 // ------- 前端页面 -------
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
