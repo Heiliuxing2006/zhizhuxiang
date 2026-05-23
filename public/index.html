@@ -662,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (preview) preview.innerHTML = '';
           selectedFiles = [];
           if (areaDisplay) { areaDisplay.textContent = '请输入面积'; areaDisplay.style.color = 'var(--text-gray)'; }
+          loadStats();
         } else {
           showToast(data.message || '提交失败', true);
         }
