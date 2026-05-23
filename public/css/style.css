@@ -90,6 +90,7 @@ body {
   color: var(--green-dark);
   font-weight: 800;
   margin-bottom: 8px;
+  text-wrap: balance;
 }
 .hero p {
   font-size: 15px;
