@@ -39,6 +39,63 @@
       margin-top: 8px;
       line-height: 1.6;
     }
+    /* 成功案例页 */
+    .case-video-wrap {
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .case-video-wrap video {
+      width: 100%;
+      display: block;
+    }
+    .case-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin: 24px 0 12px;
+      padding-left: 12px;
+      border-left: 3px solid var(--green-mid);
+    }
+    .case-gallery {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .case-gallery-item {
+      border-radius: 10px;
+      overflow: hidden;
+      background: #f0f0f0;
+      position: relative;
+      aspect-ratio: 4 / 3;
+    }
+    .case-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .case-gallery-item .label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+      color: #fff;
+      font-size: 12px;
+      padding: 20px 8px 6px;
+    }
+    .case-upload-hint {
+      text-align: center;
+      padding: 30px 20px;
+      background: #f9f9f6;
+      border-radius: 12px;
+      border: 2px dashed #ddd;
+      color: #999;
+      font-size: 13px;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
@@ -408,6 +465,37 @@
   </div>
 </div>
 
+<!-- ===== 案例页 ===== -->
+<div class="page" id="page-case">
+  <div class="page-content" style="padding:0 16px 20px;">
+    <h2 style="font-size:20px;color:var(--green-dark);margin:16px 0 12px;">什么是 GROW 农场</h2>
+    <p style="font-size:13px;color:var(--text-gray);margin-bottom:16px;line-height:1.6;">
+      驷牧集团标准化智能家庭农场 —— 整装车交付、代养合作、村集体入股分红
+    </p>
+
+    <div class="case-video-wrap">
+      <video controls playsinline preload="metadata" poster="">
+        <source src="/public/videos/grow-intro.mp4" type="video/mp4">
+        您的设备不支持视频播放
+      </video>
+    </div>
+
+    <div class="case-section-title">📸 成功案例</div>
+    <p style="font-size:13px;color:var(--text-gray);margin-bottom:12px;">
+      不同地区的 GROW 农场航拍实景
+    </p>
+
+    <div class="case-gallery" id="case-gallery">
+      <!-- 照片由 JS 动态加载，或直接在此添加 img -->
+    </div>
+
+    <div class="case-upload-hint" id="case-upload-hint">
+      📷 你有成功案例的照片或航拍图？<br>
+      <span style="font-size:12px;">联系 Ben 添加到这里 · ben.leexin@gmail.com</span>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 底部导航栏 ===== -->
 <div class="tabbar">
   <div class="tabbar-item active" data-page="home" onclick="switchPage('home')">
@@ -421,6 +509,10 @@
   <div class="tabbar-item" data-page="list" onclick="switchPage('list')">
     <span class="tab-icon">🏘️</span>
     <span class="tab-label">列表</span>
+  </div>
+  <div class="tabbar-item" data-page="case" onclick="switchPage('case')">
+    <span class="tab-icon">🎬</span>
+    <span class="tab-label">案例</span>
   </div>
   <div class="tabbar-item" data-page="about" onclick="switchPage('about')">
     <span class="tab-icon">ℹ️</span>
