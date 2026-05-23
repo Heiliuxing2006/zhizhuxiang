@@ -8,10 +8,13 @@ const API = '';  // 空 = 同域
 function switchPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tabbar-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.header-nav a').forEach(a => a.classList.remove('active'));
   const page = document.getElementById('page-' + pageId);
   if (page) page.classList.add('active');
   const tab = document.querySelector(`.tabbar-item[data-page="${pageId}"]`);
   if (tab) tab.classList.add('active');
+  const navLink = document.querySelector(`.header-nav a[data-page="${pageId}"]`);
+  if (navLink) navLink.classList.add('active');
   window.scrollTo(0, 0);
   // 加载数据
   if (pageId === 'list') loadList();
