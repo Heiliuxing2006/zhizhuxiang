@@ -2,23 +2,10 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const store = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-// ------- 数据存储 -------
-const DATA_FILE = path.join(__dirname, 'data', 'submissions.json');
-const ensureDataFile = () => {
-  const dir = path.dirname(DATA_FILE);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify({ submissions: [] }, null, 2));
-  }
-};
-ensureDataFile();
-
-const readData = () => JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-const writeData = (data) => fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 
 // ------- 中间件 -------
 app.use(express.json());
@@ -43,7 +30,7 @@ const upload = multer({ storage });
 // ------- API 路由 -------
 
 // 提交养殖场信息
-app.post('/api/submit', upload.array('photos', 5), (req, res) => {
+app.post('/api/submit', upload.array('photos', 5), async (req, res) => {
   try {
     const { name, phone, province, city, county, town, village, area, status, landType, landShape, landHolder, landNature, surveyed, hasOtherFarm, priceExpectation, water, electricity, road, description, note } = req.body;
 
@@ -94,9 +81,7 @@ app.post('/api/submit', upload.array('photos', 5), (req, res) => {
       contacted: false
     };
 
-    const data = readData();
-    data.submissions.unshift(submission);
-    writeData(data);
+    await store.addSubmission(submission);
 
     res.json({ success: true, message: '提交成功！我们会尽快与您联系。', id: submission.id });
   } catch (err) {
@@ -106,59 +91,76 @@ app.post('/api/submit', upload.array('photos', 5), (req, res) => {
 });
 
 // 获取统计数据（公开）
-app.get('/api/stats', (req, res) => {
-  const data = readData();
-  const total = data.submissions.length;
-  const areas = data.submissions.map(s => s.area);
-  const totalArea = areas.reduce((a, b) => a + b, 0);
-  const provinces = [...new Set(data.submissions.map(s => s.province))].length;
-  res.json({ success: true, total, totalArea: Math.round(totalArea), provinces });
+app.get('/api/stats', async (req, res) => {
+  try {
+    const submissions = await store.getAll();
+    const total = submissions.length;
+    const totalArea = submissions.reduce((a, s) => a + s.area, 0);
+    const provinces = [...new Set(submissions.map(s => s.province))].length;
+    res.json({ success: true, total, totalArea: Math.round(totalArea), provinces });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
 });
 
 // 获取收录列表（脱敏，公开）
-app.get('/api/list', (req, res) => {
-  const data = readData();
-  const list = data.submissions.slice(0, 100).map(s => ({
-    id: s.id,
-    landType: s.landType || '',
-    province: s.province,
-    city: s.city,
-    county: s.county,
-    town: s.town,
-    village: s.village,
-    area: s.area,
-    landNature: s.landNature || '',
-    status: s.status,
-    createdAt: s.createdAt.slice(0, 10)
-  }));
-  res.json({ success: true, list, total: data.submissions.length });
+app.get('/api/list', async (req, res) => {
+  try {
+    const list = await store.getList(100);
+    const total = await store.getTotal();
+    const items = list.map(s => ({
+      id: s.id,
+      landType: s.landType || '',
+      province: s.province,
+      city: s.city,
+      county: s.county,
+      town: s.town,
+      village: s.village,
+      area: s.area,
+      landNature: s.landNature || '',
+      status: s.status,
+      createdAt: s.createdAt.slice(0, 10)
+    }));
+    res.json({ success: true, list: items, total });
+  } catch (err) {
+    console.error('List error:', err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
 });
 
 // 管理员：获取全部详情（含联系方式）
-app.get('/api/admin/all', (req, res) => {
+app.get('/api/admin/all', async (req, res) => {
   const token = req.query.token;
   if (token !== 'zhizhuxiang2026') {
     return res.status(401).json({ success: false, message: 'unauthorized' });
   }
-  const data = readData();
-  res.json({ success: true, submissions: data.submissions });
+  try {
+    const submissions = await store.getAll();
+    res.json({ success: true, submissions });
+  } catch (err) {
+    console.error('Admin all error:', err);
+    res.status(500).json({ success: false, message: '服务器错误' });
+  }
 });
 
 // 管理员：标记已联系
-app.post('/api/admin/contacted', (req, res) => {
+app.post('/api/admin/contacted', async (req, res) => {
   const token = req.query.token;
   if (token !== 'zhizhuxiang2026') {
     return res.status(401).json({ success: false, message: 'unauthorized' });
   }
-  const { id } = req.body;
-  const data = readData();
-  const sub = data.submissions.find(s => s.id === id);
-  if (sub) {
-    sub.contacted = true;
-    writeData(data);
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ success: false, message: 'not found' });
+  try {
+    const { id } = req.body;
+    const ok = await store.markContacted(id);
+    if (ok) {
+      res.json({ success: true });
+    } else {
+      res.status(404).json({ success: false, message: 'not found' });
+    }
+  } catch (err) {
+    console.error('Contacted error:', err);
+    res.status(500).json({ success: false, message: '服务器错误' });
   }
 });
 
@@ -172,10 +174,19 @@ app.get('/admin', (req, res) => {
 });
 
 // ------- 启动 -------
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n  🐷 智猪乡盟 · 托猪所联盟`);
-  console.log(`  ─────────────────────────`);
-  console.log(`  收录页:  http://localhost:${PORT}`);
-  console.log(`  管理后台: http://localhost:${PORT}/admin?token=zhizhuxiang2026`);
-  console.log(`  ─────────────────────────\n`);
+async function start() {
+  await store.init();
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n  🐷 智猪乡盟 · 托猪所联盟`);
+    console.log(`  ─────────────────────────`);
+    console.log(`  收录页:  http://localhost:${PORT}`);
+    console.log(`  管理后台: http://localhost:${PORT}/admin?token=zhizhuxiang2026`);
+    console.log(`  ─────────────────────────\n`);
+  });
+}
+
+start().catch(err => {
+  console.error('启动失败:', err);
+  process.exit(1);
 });
