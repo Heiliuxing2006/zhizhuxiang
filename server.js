@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
 const store = require('./db');
@@ -11,21 +10,9 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/public', express.static(path.join(__dirname, 'public'), { maxAge: '7d' }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'), { maxAge: '7d' }));
 
-// 文件上传配置
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + '-' + Math.random().toString(36).slice(2) + ext);
-  }
-});
-const upload = multer({ storage });
+// 文件上传配置（改为内存存储，直接转 base64 存入数据库）
+const upload = multer({ storage: multer.memoryStorage() });
 
 // ------- API 路由 -------
 
@@ -51,7 +38,7 @@ app.post('/api/submit', upload.array('photos', 5), async (req, res) => {
       return res.json({ success: false, message: '面积数据异常，请检查' });
     }
 
-    const photos = req.files ? req.files.map(f => '/uploads/' + f.filename) : [];
+    const photos = req.files ? req.files.map(f => 'data:' + f.mimetype + ';base64,' + f.buffer.toString('base64')) : [];
 
     const submission = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
