@@ -1,5 +1,5 @@
 /**
- * 智猪乡盟 · 数据存储模块
+ * 智猪侠 · 数据存储模块
  * 支持 PostgreSQL（当 DATABASE_URL 环境变量存在时）
  * 回退到 JSON 文件存储（无 DATABASE_URL 时）
  */

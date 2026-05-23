@@ -178,7 +178,7 @@ async function start() {
   await store.init();
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n  🐷 智猪乡盟 · 托猪所联盟`);
+    console.log(`\n  🐷 智猪侠 · 托猪所联盟`);
     console.log(`  ─────────────────────────`);
     console.log(`  收录页:  http://localhost:${PORT}`);
     console.log(`  管理后台: http://localhost:${PORT}/admin?token=zhizhuxiang2026`);

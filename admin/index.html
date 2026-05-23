@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>智猪乡盟 · 管理后台</title>
+  <title>智猪侠 · 管理后台</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #F5F5F0; color: #1A1A1A; padding: 20px; }
@@ -30,7 +30,7 @@
   </style>
 </head>
 <body>
-  <h1>🐷 智猪乡盟 · 管理后台</h1>
+  <h1>🐷 智猪侠 · 管理后台</h1>
   <p class="sub">托猪所联盟 — 养殖场收录数据管理</p>
   <div class="stats" id="stats"></div>
   <div class="search-bar">
@@ -141,7 +141,7 @@
       const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `智猪乡盟_收录数据_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.download = `智猪侠_收录数据_${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
     }
 

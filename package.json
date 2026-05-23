@@ -1,7 +1,7 @@
 {
   "name": "zhu-tuo-suo",
   "version": "1.0.0",
-  "description": "托猪所联盟 - 智猪乡盟闲置养殖场收录小程序",
+  "description": "托猪所联盟 - 智猪侠闲置养殖场收录小程序",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
