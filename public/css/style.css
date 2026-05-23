@@ -448,6 +448,10 @@ body {
 .tabbar-item:active { opacity: 0.6; }
 
 /* ── 响应式 ── */
+@media (max-width: 400px) {
+  .header-logo span { font-size: 15px; }
+  .header-nav a { font-size: 12px; padding: 4px 6px; }
+}
 @media (min-width: 600px) {
   .header { padding: 12px 24px; }
   .page { padding: 20px 24px; }
