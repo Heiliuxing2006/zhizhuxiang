@@ -114,10 +114,7 @@
           <td>${s.name}</td>
           <td style="font-size:12px">${s.phone}</td>
           <td style="font-size:11px">${(s.description || '').slice(0, 15)}${s.description?.length > 15 ? '...' : ''}</td>
-          <td>${s.contacted
-            ? '<span class="badge badge-done">已联系</span>'
-            : '<button class="btn-sm" onclick="markContacted(\'' + s.id + '\')">标记已联系</button>'
-          }<br><button class="btn-sm" style="background:#C0392B;margin-top:4px" onclick="deleteItem(\'' + s.id + '\')">🗑 删除</button></td>
+          <td>${(s.contacted ? '<span class="badge badge-done">已联系</span>' : '<button class="btn-sm" onclick="markContacted(\'' + s.id + '\')">标记已联系</button>') + '<br><button class="btn-sm" style="background:#C0392B;margin-top:4px" onclick="deleteItem(\'' + s.id + '\')">🗑 删除</button>'}</td>
         </tr>`;
       });
       html += '</tbody></table>';
