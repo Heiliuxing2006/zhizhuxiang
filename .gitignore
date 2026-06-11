@@ -4,3 +4,13 @@ uploads/*
 data/*.json
 .DS_Store
 *.tar.gz
+
+# 备份与临时设计稿（勿提交）
+*.bak
+public/index-taste.html
+public/index-taste-preview.html
+_taste-skill/
+
+# 办公/商业文件（勿提交）
+*.pptx
+*.xlsx

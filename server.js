@@ -19,7 +19,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 // 提交养殖场信息
 app.post('/api/submit', upload.array('photos', 5), async (req, res) => {
   try {
-    const { name, phone, province, city, county, town, village, area, status, landType, landShape, landHolder, landNature, surveyed, hasOtherFarm, priceExpectation, water, electricity, road, description, note } = req.body;
+    const { name, phone, province, city, county, town, village, latitude, longitude, locationAccuracy, locationCapturedAt, area, status, landType, landShape, landHolder, landNature, surveyed, hasOtherFarm, priceExpectation, water, electricity, road, description, note } = req.body;
 
     // 验证必填字段
     if (!name || !phone || !province || !county) {
@@ -39,6 +39,10 @@ app.post('/api/submit', upload.array('photos', 5), async (req, res) => {
     }
 
     const photos = req.files ? req.files.map(f => 'data:' + f.mimetype + ';base64,' + f.buffer.toString('base64')) : [];
+    const parsedLatitude = Number.parseFloat(latitude);
+    const parsedLongitude = Number.parseFloat(longitude);
+    const parsedLocationAccuracy = Number.parseFloat(locationAccuracy);
+    const hasLocation = Number.isFinite(parsedLatitude) && Number.isFinite(parsedLongitude);
 
     const submission = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
@@ -49,6 +53,10 @@ app.post('/api/submit', upload.array('photos', 5), async (req, res) => {
       county,
       town: town || '',
       village: village || '',
+      latitude: hasLocation ? parsedLatitude : null,
+      longitude: hasLocation ? parsedLongitude : null,
+      locationAccuracy: hasLocation && Number.isFinite(parsedLocationAccuracy) ? parsedLocationAccuracy : null,
+      locationCapturedAt: hasLocation ? (locationCapturedAt || '') : '',
       area: parseFloat(area),
       landType: landType || '',
       landShape: landShape || '',

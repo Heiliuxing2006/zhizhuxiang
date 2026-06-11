@@ -24,6 +24,8 @@
     .btn-sm:disabled { opacity: 0.5; cursor: default; }
     .photo-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd; }
     .photo-thumb:hover { opacity: 0.8; }
+    .location-cell { font-size: 11px; line-height: 1.5; }
+    .location-cell a { color: #1D9E75; text-decoration: none; }
     .modal { display: none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; padding:20px; }
     .modal.show { display:flex; }
     .modal img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
@@ -100,12 +102,17 @@
       }
 
       const typeMap = { '改造': '🏚️改造', '新建': '🌱新建', '两者皆可': '✅两者' };
-      let html = `<table><thead><tr><th>时间</th><th>类型</th><th>地区</th><th>面积</th><th>土地信息</th><th>持有人</th><th>通水电</th><th>照片</th><th>联系人</th><th>电话</th><th>备注</th><th>操作</th></tr></thead><tbody>`;
+      let html = `<table><thead><tr><th>时间</th><th>类型</th><th>地区</th><th>定位</th><th>面积</th><th>土地信息</th><th>持有人</th><th>通水电</th><th>照片</th><th>联系人</th><th>电话</th><th>备注</th><th>操作</th></tr></thead><tbody>`;
       filtered.forEach(s => {
+        const hasLocation = Number.isFinite(Number(s.latitude)) && Number.isFinite(Number(s.longitude));
+        const locationHtml = hasLocation
+          ? `<div class="location-cell">${Number(s.latitude).toFixed(6)}, ${Number(s.longitude).toFixed(6)}<br>${s.locationAccuracy ? '约' + Math.round(s.locationAccuracy) + '米 · ' : ''}<a href="https://www.google.com/maps?q=${s.latitude},${s.longitude}" target="_blank">查看地图</a></div>`
+          : '-';
         html += `<tr>
           <td>${s.createdAt.slice(0, 10)}</td>
           <td>${typeMap[s.landType] || s.landType || '-'}</td>
           <td>${s.province} ${s.city} ${s.county}<br>${s.town || ''} ${s.village || ''}</td>
+          <td>${locationHtml}</td>
           <td>${s.area}亩</td>
           <td style="font-size:12px">${s.landNature || '-'}<br>${s.landShape || ''} ${s.surveyed ? '| ' + s.surveyed : ''}</td>
           <td style="font-size:12px">${s.landHolder || '-'}<br>${s.hasOtherFarm ? '周边:' + s.hasOtherFarm : ''}${s.priceExpectation ? '|叫价:' + s.priceExpectation : ''}</td>
@@ -132,9 +139,10 @@
     }
 
     function exportCSV() {
-      const headers = ['提交时间', '类型', '省份', '城市', '县区', '乡镇', '村', '面积(亩)', '土地形状', '土地持有人', '土地性质', '状态', '是否测绘', '有无其他猪场', '叫价意向', '通水', '通电', '通路', '姓名', '电话', '场地描述', '备注', '已联系'];
+      const headers = ['提交时间', '类型', '省份', '城市', '县区', '乡镇', '村', '纬度', '经度', '定位精度(米)', '定位时间', '面积(亩)', '土地形状', '土地持有人', '土地性质', '状态', '是否测绘', '有无其他猪场', '叫价意向', '通水', '通电', '通路', '姓名', '电话', '场地描述', '备注', '已联系'];
       const rows = allData.map(s => [
         s.createdAt.slice(0, 10), s.landType || '', s.province, s.city, s.county, s.town, s.village,
+        s.latitude ?? '', s.longitude ?? '', s.locationAccuracy ?? '', s.locationCapturedAt || '',
         s.area, s.landShape || '', s.landHolder || '', s.landNature || '', s.status, s.surveyed || '', s.hasOtherFarm || '', s.priceExpectation || '',
         s.water ? '是' : '否', s.electricity ? '是' : '否', s.road ? '是' : '否',
         s.name, s.phone, `"${(s.description || '').replace(/"/g, '""')}"`, `"${(s.note || '').replace(/"/g, '""')}"`,

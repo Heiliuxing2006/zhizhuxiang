@@ -277,6 +277,43 @@ body {
   margin-top: 4px;
 }
 
+/* 定位采集 */
+.location-capture {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 4px;
+}
+.btn-location {
+  width: auto;
+  min-width: 132px;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+.btn-location:disabled {
+  opacity: 0.65;
+  cursor: default;
+  transform: none;
+}
+.location-clear {
+  border: none;
+  background: transparent;
+  color: #C0392B;
+  font-size: 13px;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.location-status {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-gray);
+  line-height: 1.5;
+}
+.location-status.success { color: var(--green-dark); }
+.location-status.error { color: #C0392B; }
+
 /* 照片上传 */
 .photo-upload {
   border: 2px dashed var(--border);

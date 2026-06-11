@@ -33,6 +33,10 @@ async function init() {
         county TEXT NOT NULL,
         town TEXT DEFAULT '',
         village TEXT DEFAULT '',
+        latitude DOUBLE PRECISION,
+        longitude DOUBLE PRECISION,
+        location_accuracy DOUBLE PRECISION,
+        location_captured_at TEXT DEFAULT '',
         area DOUBLE PRECISION NOT NULL,
         land_type TEXT DEFAULT '',
         land_shape TEXT DEFAULT '',
@@ -51,6 +55,13 @@ async function init() {
         created_at TEXT NOT NULL,
         contacted BOOLEAN DEFAULT false
       )
+    `);
+    await pool.query(`
+      ALTER TABLE submissions
+        ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+        ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+        ADD COLUMN IF NOT EXISTS location_accuracy DOUBLE PRECISION,
+        ADD COLUMN IF NOT EXISTS location_captured_at TEXT DEFAULT ''
     `);
     console.log('  📦 PostgreSQL 存储已就绪');
   } else {
@@ -74,6 +85,10 @@ function rowToSubmission(row) {
     county: row.county,
     town: row.town || '',
     village: row.village || '',
+    latitude: row.latitude ?? null,
+    longitude: row.longitude ?? null,
+    locationAccuracy: row.location_accuracy ?? null,
+    locationCapturedAt: row.location_captured_at || '',
     area: row.area,
     landType: row.land_type || '',
     landShape: row.land_shape || '',
@@ -132,13 +147,15 @@ async function addSubmission(sub) {
     await pool.query(`
       INSERT INTO submissions (
         id, name, phone, province, city, county, town, village,
+        latitude, longitude, location_accuracy, location_captured_at,
         area, land_type, land_shape, land_holder, land_nature, status,
         surveyed, has_other_farm, price_expectation,
         water, electricity, road, description, note,
         photos, created_at, contacted
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29)
     `, [
       sub.id, sub.name, sub.phone, sub.province, sub.city, sub.county, sub.town, sub.village,
+      sub.latitude, sub.longitude, sub.locationAccuracy, sub.locationCapturedAt,
       sub.area, sub.landType, sub.landShape, sub.landHolder, sub.landNature, sub.status,
       sub.surveyed, sub.hasOtherFarm, sub.priceExpectation,
       sub.water, sub.electricity, sub.road, sub.description, sub.note,
