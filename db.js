@@ -10,60 +10,73 @@ const { Pool } = require('pg');
 const DATA_FILE = path.join(__dirname, 'data', 'submissions.json');
 
 // ── 判断使用哪种存储 ──
-const useDb = !!process.env.DATABASE_URL;
+let useDb = !!process.env.DATABASE_URL;
 let pool;
 
 if (useDb) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { rejectUnauthorized: false },
+    connectionTimeoutMillis: 5000  // 5 秒超时，连不上自动回退 JSON
   });
 }
 
 // ── 初始化 ──
 async function init() {
   if (useDb) {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS submissions (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        province TEXT NOT NULL,
-        city TEXT DEFAULT '',
-        county TEXT NOT NULL,
-        town TEXT DEFAULT '',
-        village TEXT DEFAULT '',
-        latitude DOUBLE PRECISION,
-        longitude DOUBLE PRECISION,
-        location_accuracy DOUBLE PRECISION,
-        location_captured_at TEXT DEFAULT '',
-        area DOUBLE PRECISION NOT NULL,
-        land_type TEXT DEFAULT '',
-        land_shape TEXT DEFAULT '',
-        land_holder TEXT DEFAULT '',
-        land_nature TEXT DEFAULT '',
-        status TEXT DEFAULT '闲置',
-        surveyed TEXT DEFAULT '',
-        has_other_farm TEXT DEFAULT '',
-        price_expectation TEXT DEFAULT '',
-        water BOOLEAN DEFAULT false,
-        electricity BOOLEAN DEFAULT false,
-        road BOOLEAN DEFAULT false,
-        description TEXT DEFAULT '',
-        note TEXT DEFAULT '',
-        photos TEXT DEFAULT '[]',
-        created_at TEXT NOT NULL,
-        contacted BOOLEAN DEFAULT false
-      )
-    `);
-    await pool.query(`
-      ALTER TABLE submissions
-        ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
-        ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
-        ADD COLUMN IF NOT EXISTS location_accuracy DOUBLE PRECISION,
-        ADD COLUMN IF NOT EXISTS location_captured_at TEXT DEFAULT ''
-    `);
-    console.log('  📦 PostgreSQL 存储已就绪');
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS submissions (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          province TEXT NOT NULL,
+          city TEXT DEFAULT '',
+          county TEXT NOT NULL,
+          town TEXT DEFAULT '',
+          village TEXT DEFAULT '',
+          latitude DOUBLE PRECISION,
+          longitude DOUBLE PRECISION,
+          location_accuracy DOUBLE PRECISION,
+          location_captured_at TEXT DEFAULT '',
+          area DOUBLE PRECISION NOT NULL,
+          land_type TEXT DEFAULT '',
+          land_shape TEXT DEFAULT '',
+          land_holder TEXT DEFAULT '',
+          land_nature TEXT DEFAULT '',
+          status TEXT DEFAULT '闲置',
+          surveyed TEXT DEFAULT '',
+          has_other_farm TEXT DEFAULT '',
+          price_expectation TEXT DEFAULT '',
+          water BOOLEAN DEFAULT false,
+          electricity BOOLEAN DEFAULT false,
+          road BOOLEAN DEFAULT false,
+          description TEXT DEFAULT '',
+          note TEXT DEFAULT '',
+          photos TEXT DEFAULT '[]',
+          created_at TEXT NOT NULL,
+          contacted BOOLEAN DEFAULT false
+        )
+      `);
+      await pool.query(`
+        ALTER TABLE submissions
+          ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+          ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+          ADD COLUMN IF NOT EXISTS location_accuracy DOUBLE PRECISION,
+          ADD COLUMN IF NOT EXISTS location_captured_at TEXT DEFAULT ''
+      `);
+      console.log('  📦 PostgreSQL 存储已就绪');
+    } catch (err) {
+      console.warn('  ⚠️  PostgreSQL 连接失败，回退到 JSON 文件存储:', err.message);
+      useDb = false;
+      // 回退初始化
+      const dir = path.dirname(DATA_FILE);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      if (!fs.existsSync(DATA_FILE)) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify({ submissions: [] }, null, 2));
+      }
+      console.log('  📄 JSON 文件存储已就绪（回退）');
+    }
   } else {
     const dir = path.dirname(DATA_FILE);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
