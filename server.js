@@ -1,10 +1,24 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
 const store = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// 注入环境变量到前端（高德地图 Key 等）
+function injectEnv(html) {
+  const vars = {
+    __AMAP_KEY__: process.env.AMAP_KEY || process.env.NEXT_PUBLIC_AMAP_KEY || '',
+    __AMAP_SECURITY_CODE__: process.env.AMAP_SECURITY_CODE || process.env.NEXT_PUBLIC_AMAP_SECURITY_CODE || '',
+  };
+  let result = html;
+  for (const [key, value] of Object.entries(vars)) {
+    result = result.replaceAll(key, value);
+  }
+  return result;
+}
 
 // ------- 中间件 -------
 app.use(express.json());
@@ -181,7 +195,8 @@ app.post('/api/admin/delete', async (req, res) => {
 
 // ------- 前端页面 -------
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  res.send(injectEnv(html));
 });
 
 app.get('/admin', (req, res) => {
