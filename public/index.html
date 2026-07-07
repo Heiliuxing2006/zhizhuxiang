@@ -992,6 +992,8 @@ document.addEventListener('DOMContentLoaded', () => {
     [latitudeInput, longitudeInput, locationAccuracyInput, locationCapturedAtInput].forEach(i => { if (i) i.value = ''; });
     if (locationClear) locationClear.hidden = true;
     if (locationButton) locationButton.textContent = '获取当前位置';
+    // 同步清除地图标记
+    if (window._mapClearMarker) window._mapClearMarker();
     setLocationStatus('可选：点击获取 GPS 坐标，方便后续看地导航。');
   }
   if (locationButton && locationStatus) {
@@ -1007,6 +1009,8 @@ document.addEventListener('DOMContentLoaded', () => {
           locationButton.disabled = false; locationButton.textContent = '重新定位';
           if (locationClear) locationClear.hidden = false;
           setLocationStatus(`已获取：${latitude.toFixed(6)}, ${longitude.toFixed(6)}（约 ${Math.round(accuracy || 0)} 米）`, 'success');
+          // 同步到地图
+          if (window._mapSetMarker) window._mapSetMarker(longitude, latitude, Math.round(accuracy || 0));
         }, err => {
           locationButton.disabled = false; locationButton.textContent = '获取当前位置';
           const m = { 1: '定位权限被拒绝，可在浏览器地址栏重新允许定位。', 2: '暂时无法获取当前位置，请确认设备定位已开启。', 3: '定位超时，请到空旷位置后重试。' };
@@ -1124,6 +1128,15 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
+    // 暴露给外部（geolocation 等）同步调用
+    window._mapSetMarker = function(lng, lat, acc) { setMarker(lng, lat); };
+    window._mapClearMarker = function() {
+      if (markerInstance) { markerInstance.setMap(null); markerInstance = null; }
+    };
+    window._mapShowAt = function(lng, lat) {
+      if (mapInstance) mapInstance.setCenter([lng, lat]);
+    };
+
     function initMap() {
       mapInstance = new window.AMap.Map(container, {
         zoom: 5,
@@ -1137,11 +1150,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setMarker(e.lnglat.lng, e.lnglat.lat);
       });
 
-      // 已有的GPS坐标回显
+      // 已有的GPS坐标回显（geolocation 可能比地图先完成）
       var lng = lngInput && parseFloat(lngInput.value);
       var lat = latInput && parseFloat(latInput.value);
       if (lng && lat && isFinite(lng) && isFinite(lat)) {
         setMarker(lng, lat);
+        mapInstance.setZoomAndCenter(16, [lng, lat]);
       }
     }
 
