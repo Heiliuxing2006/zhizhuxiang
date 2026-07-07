@@ -1104,11 +1104,18 @@ document.addEventListener('DOMContentLoaded', () => {
       reverseFillAddress(lng, lat);
     }
 
+    // 逆地理待执行队列（GPS 可能先于 AMap 加载完成）
+    var _reverseQueue = [];
+
     // 逆地理编码：坐标 → 省/市/区/镇/村地址
     function reverseFillAddress(lng, lat) {
+      if (!window.AMap || !window.AMap.Geocoder) {
+        _reverseQueue.push([lng, lat]);
+        return;
+      }
       if (!geocoderInstance) geocoderInstance = new window.AMap.Geocoder({ city: '全国' });
       var province = document.getElementById('province');
-      var city = document.getElementById('city');
+      var cityEl = document.getElementById('city');
       var county = document.getElementById('county');
       var town = document.getElementById('town');
       var village = document.getElementById('village');
@@ -1119,17 +1126,37 @@ document.addEventListener('DOMContentLoaded', () => {
           var c = ac.city || ac.province || ''; // 直辖市 city 为空数组
           var d = ac.district || '';
           var t = ac.township || '';
+          // 街道+门牌号
           var sn = ac.streetNumber || {};
-          var v = (sn.street || '') + ((sn.street && sn.number) ? sn.number + '号' : '');
-          // 仅当对应字段为空或仅含占位文本时才自动填充（避免覆盖用户已填内容）
-          if (province && !province.value.trim()) province.value = Array.isArray(p) ? (p[0] || '') : p;
-          if (city && !city.value.trim()) city.value = Array.isArray(c) ? (c[0] || '') : c;
-          if (county && !county.value.trim()) county.value = d;
-          if (town && !town.value.trim()) town.value = t;
-          if (village && !village.value.trim()) village.value = v;
-          if (p) showStatus('已识别：' + (Array.isArray(p) ? p[0] : p) + ' ' + d + ' ' + t, 'success');
+          var v = (sn.street || '') + (sn.number || '') + (ac.neighborhood && ac.neighborhood.name ? ac.neighborhood.name : '');
+          // 乡镇级补丁：township 有时在 township 字段，有时在 village 字段
+          if (!t && ac.village && typeof ac.village === 'string') t = ac.village;
+          if (!v) v = '';
+          var pv = Array.isArray(p) ? (p[0] || '') : (p || '');
+          var cv = Array.isArray(c) ? (c[0] || '') : (c || '');
+          if (province && !province.value.trim()) province.value = pv;
+          if (cityEl && !cityEl.value.trim()) cityEl.value = cv;
+          if (county && !county.value.trim()) county.value = d || '';
+          if (town && !town.value.trim()) town.value = t || '';
+          if (village && !village.value.trim() && v) village.value = v;
+          if (pv) showStatus('已识别：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
+        } else {
+          // 重试一次
+          setTimeout(function() {
+            if (geocoderInstance) geocoderInstance.getAddress([lng, lat], function(s2, r2) {
+              if (s2 !== 'complete') console.warn('逆地理编码失败', status, result);
+            });
+          }, 800);
         }
       });
+    }
+
+    // 地图就绪后消费队列
+    function _drainReverseQueue() {
+      while (_reverseQueue.length > 0) {
+        var args = _reverseQueue.shift();
+        reverseFillAddress(args[0], args[1]);
+      }
     }
 
     function setMarker(lng, lat) {
@@ -1173,6 +1200,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resizeEnable: true
       });
       container.classList.add('loaded');
+
+      // 消费 GPS 先于地图就绪的逆地理队列
+      _drainReverseQueue();
 
       // 点击地图选点
       mapInstance.on('click', function(e) {
