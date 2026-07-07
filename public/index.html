@@ -1125,15 +1125,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function reverseFillAddress(lng, lat) {
+      console.log('[reverseFillAddress] called with', lng, lat);
       _ensureGeocoder(function(geo) {
+        console.log('[reverseFillAddress] geocoder ready, calling getAddress');
         var province = document.getElementById('province');
         var cityEl = document.getElementById('city');
         var county = document.getElementById('county');
         var town = document.getElementById('town');
         var village = document.getElementById('village');
+        console.log('[reverseFillAddress] elements:', !!province, !!cityEl, !!county, !!town, !!village);
         geo.getAddress([lng, lat], function(status, result) {
+          console.log('[reverseFillAddress] getAddress callback', status, result && result.info);
           if (status === 'complete' && result.info === 'OK') {
             var ac = result.regeocode.addressComponent;
+            console.log('[reverseFillAddress] addressComponent:', JSON.stringify(ac));
             var p = ac.province || '';
             var c = ac.city || ac.province || '';
             var d = ac.district || '';
@@ -1144,12 +1149,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!v) v = '';
             var pv = Array.isArray(p) ? (p[0] || '') : (p || '');
             var cv = Array.isArray(c) ? (c[0] || '') : (c || '');
-            if (province && !province.value.trim()) province.value = pv;
-            if (cityEl && !cityEl.value.trim()) cityEl.value = cv;
-            if (county && !county.value.trim()) county.value = d || '';
-            if (town && !town.value.trim()) town.value = t || '';
-            if (village && !village.value.trim() && v) village.value = v;
+            console.log('[reverseFillAddress] parsed:', pv, cv, d, t, v, '| existing province:', province && province.value, '| city:', cityEl && cityEl.value);
+            if (province && !province.value.trim()) { province.value = pv; console.log('[reverseFillAddress] set province'); }
+            if (cityEl && !cityEl.value.trim()) { cityEl.value = cv; console.log('[reverseFillAddress] set city'); }
+            if (county && !county.value.trim()) { county.value = d || ''; console.log('[reverseFillAddress] set county'); }
+            if (town && !town.value.trim()) { town.value = t || ''; console.log('[reverseFillAddress] set town'); }
+            if (village && !village.value.trim() && v) { village.value = v; console.log('[reverseFillAddress] set village'); }
             if (pv) showStatus('已识别：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
+          } else {
+            console.warn('[reverseFillAddress] FAILED', status, result);
           }
         });
       });
