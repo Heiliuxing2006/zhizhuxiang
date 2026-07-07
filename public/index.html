@@ -1147,14 +1147,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     var amapLoad = window._AMAP_LOAD;
     if (amapLoad) {
-      // 放在这里防止阻塞表单
-      var observer = new IntersectionObserver(function(entries, obs) {
-        if (entries[0].isIntersecting) {
-          obs.disconnect();
-          amapLoad.then(initMap)['catch'](function() { showStatus('地图加载失败，可手动填写坐标', 'error'); });
-        }
-      }, { once: true });
-      observer.observe(container);
+      amapLoad.then(initMap).catch(function() { showStatus('地图加载失败，可手动填写坐标', 'error'); });
     } else {
       showStatus('地图服务未配置，可手动获取 GPS 坐标', '');
     }
