@@ -1104,59 +1104,55 @@ document.addEventListener('DOMContentLoaded', () => {
       reverseFillAddress(lng, lat);
     }
 
-    // 逆地理待执行队列（GPS 可能先于 AMap 加载完成）
+    // 逆地理编码是否就绪
+    var _geocoderReady = false;
     var _reverseQueue = [];
 
-    // 逆地理编码：坐标 → 省/市/区/镇/村地址
-    function reverseFillAddress(lng, lat) {
-      if (!window.AMap || !window.AMap.Geocoder) {
-        _reverseQueue.push([lng, lat]);
+    function _ensureGeocoder(cb) {
+      if (geocoderInstance && _geocoderReady) return cb(geocoderInstance);
+      if (!window.AMap) {
+        _reverseQueue.push(function() { _ensureGeocoder(cb); });
         return;
       }
-      if (!geocoderInstance) geocoderInstance = new window.AMap.Geocoder({ city: '全国' });
-      var province = document.getElementById('province');
-      var cityEl = document.getElementById('city');
-      var county = document.getElementById('county');
-      var town = document.getElementById('town');
-      var village = document.getElementById('village');
-      geocoderInstance.getAddress([lng, lat], function(status, result) {
-        if (status === 'complete' && result.info === 'OK') {
-          var ac = result.regeocode.addressComponent;
-          var p = ac.province || '';
-          var c = ac.city || ac.province || ''; // 直辖市 city 为空数组
-          var d = ac.district || '';
-          var t = ac.township || '';
-          // 街道+门牌号
-          var sn = ac.streetNumber || {};
-          var v = (sn.street || '') + (sn.number || '') + (ac.neighborhood && ac.neighborhood.name ? ac.neighborhood.name : '');
-          // 乡镇级补丁：township 有时在 township 字段，有时在 village 字段
-          if (!t && ac.village && typeof ac.village === 'string') t = ac.village;
-          if (!v) v = '';
-          var pv = Array.isArray(p) ? (p[0] || '') : (p || '');
-          var cv = Array.isArray(c) ? (c[0] || '') : (c || '');
-          if (province && !province.value.trim()) province.value = pv;
-          if (cityEl && !cityEl.value.trim()) cityEl.value = cv;
-          if (county && !county.value.trim()) county.value = d || '';
-          if (town && !town.value.trim()) town.value = t || '';
-          if (village && !village.value.trim() && v) village.value = v;
-          if (pv) showStatus('已识别：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
-        } else {
-          // 重试一次
-          setTimeout(function() {
-            if (geocoderInstance) geocoderInstance.getAddress([lng, lat], function(s2, r2) {
-              if (s2 !== 'complete') console.warn('逆地理编码失败', status, result);
-            });
-          }, 800);
-        }
+      window.AMap.plugin('AMap.Geocoder', function() {
+        _geocoderReady = true;
+        geocoderInstance = new window.AMap.Geocoder({ city: '全国' });
+        cb(geocoderInstance);
+        // 消费积压队列
+        var q = _reverseQueue; _reverseQueue = [];
+        q.forEach(function(fn) { fn(); });
       });
     }
 
-    // 地图就绪后消费队列
-    function _drainReverseQueue() {
-      while (_reverseQueue.length > 0) {
-        var args = _reverseQueue.shift();
-        reverseFillAddress(args[0], args[1]);
-      }
+    function reverseFillAddress(lng, lat) {
+      _ensureGeocoder(function(geo) {
+        var province = document.getElementById('province');
+        var cityEl = document.getElementById('city');
+        var county = document.getElementById('county');
+        var town = document.getElementById('town');
+        var village = document.getElementById('village');
+        geo.getAddress([lng, lat], function(status, result) {
+          if (status === 'complete' && result.info === 'OK') {
+            var ac = result.regeocode.addressComponent;
+            var p = ac.province || '';
+            var c = ac.city || ac.province || '';
+            var d = ac.district || '';
+            var t = ac.township || '';
+            var sn = ac.streetNumber || {};
+            var v = (sn.street || '') + (sn.number || '') + (ac.neighborhood && ac.neighborhood.name ? ac.neighborhood.name : '');
+            if (!t && ac.village && typeof ac.village === 'string') t = ac.village;
+            if (!v) v = '';
+            var pv = Array.isArray(p) ? (p[0] || '') : (p || '');
+            var cv = Array.isArray(c) ? (c[0] || '') : (c || '');
+            if (province && !province.value.trim()) province.value = pv;
+            if (cityEl && !cityEl.value.trim()) cityEl.value = cv;
+            if (county && !county.value.trim()) county.value = d || '';
+            if (town && !town.value.trim()) town.value = t || '';
+            if (village && !village.value.trim() && v) village.value = v;
+            if (pv) showStatus('已识别：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
+          }
+        });
+      });
     }
 
     function setMarker(lng, lat) {
@@ -1168,19 +1164,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function geocodeAndShow(keyword) {
-      if (!geocoderInstance) geocoderInstance = new window.AMap.Geocoder({ city: '全国' });
-      geocoderInstance.getLocation(keyword, function(status, result) {
-        if (status === 'complete' && result.info === 'OK' && result.geocodes.length > 0) {
-          var geo = result.geocodes[0];
-          var lng = geo.location.lng;
-          var lat = geo.location.lat;
-          var level = geo.level; // e.g. '村庄','乡镇','区县','城市'
-          mapInstance.setZoomAndCenter(level === '村庄' || level === '乡镇' ? 14 : 12, [lng, lat]);
-          setMarker(lng, lat);
-          showStatus('已定位：' + geo.formattedAddress, 'success');
-        } else {
-          showStatus('未找到该地点，请尝试更具体的地址', 'error');
-        }
+      _ensureGeocoder(function(geo) {
+        geo.getLocation(keyword, function(status, result) {
+          if (status === 'complete' && result.info === 'OK' && result.geocodes.length > 0) {
+            var g = result.geocodes[0];
+            var lng = g.location.lng;
+            var lat = g.location.lat;
+            var level = g.level;
+            mapInstance.setZoomAndCenter(level === '村庄' || level === '乡镇' ? 14 : 12, [lng, lat]);
+            setMarker(lng, lat);
+            showStatus('已定位：' + g.formattedAddress, 'success');
+          } else {
+            showStatus('未找到该地点，请尝试更具体的地址', 'error');
+          }
+        });
       });
     }
 
@@ -1201,8 +1198,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       container.classList.add('loaded');
 
-      // 消费 GPS 先于地图就绪的逆地理队列
-      _drainReverseQueue();
+      // 触发 Geocoder 插件加载，消费 GPS 先于地图就绪的逆地理队列
+      _ensureGeocoder(function() {});
 
       // 点击地图选点
       mapInstance.on('click', function(e) {
