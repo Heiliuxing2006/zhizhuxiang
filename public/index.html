@@ -1145,12 +1145,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!v) v = '';
             var pv = Array.isArray(p) ? (p[0] || '') : (p || '');
             var cv = Array.isArray(c) ? (c[0] || '') : (c || '');
-            if (province && !province.value.trim()) { province.value = pv; }
-            if (cityEl && !cityEl.value.trim()) { cityEl.value = cv; }
-            if (county && !county.value.trim()) { county.value = d || ''; }
-            if (town && !town.value.trim()) { town.value = t || ''; }
-            if (village && !village.value.trim() && v) { village.value = v; }
-            if (pv) showStatus('已识别：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
+            if (province) { province.value = pv; }
+            if (cityEl) { cityEl.value = cv; }
+            if (county) { county.value = d || ''; }
+            if (town) { town.value = t || ''; }
+            if (village && v) { village.value = v; }
+            if (pv) showStatus('地址已更新：' + pv + ' ' + (d||'') + ' ' + (t||''), 'success');
           } else {
             // 逆地理编码失败（静默，不打扰用户）
           }
