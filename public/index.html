@@ -530,6 +530,25 @@
 
       <div class="form-card reveal">
         <h3>场地位置</h3>
+        <div class="location-capture" id="location-capture">
+          <input type="hidden" id="latitude" name="latitude">
+          <input type="hidden" id="longitude" name="longitude">
+          <input type="hidden" id="locationAccuracy" name="locationAccuracy">
+          <input type="hidden" id="locationCapturedAt" name="locationCapturedAt">
+          <button type="button" class="btn btn-outline" id="location-button">获取当前位置</button>
+          <button type="button" class="location-clear" id="location-clear" hidden>清除</button>
+          <div class="location-status" id="location-status">点击地图选点、搜索地址或获取当前位置，系统将自动填充下方地址栏。</div>
+        </div>
+
+        <!-- ── 高德地图搜索选点 ── -->
+        <div class="map-picker-wrap" id="map-picker-wrap">
+          <div class="map-search-row">
+            <input type="text" id="map-search-input" placeholder="搜索地点，如：益阳市桃江县牛田镇">
+            <button type="button" id="map-search-button">搜索</button>
+          </div>
+          <div class="map-container" id="map-container" aria-label="地图选点"></div>
+        </div>
+
         <div class="form-group">
           <label>省份 <span class="required">*</span></label>
           <input type="text" id="province" name="province" placeholder="如：湖南省" required>
@@ -543,24 +562,6 @@
         <div class="form-row-2">
           <div class="form-group"><label>镇/乡</label><input type="text" id="town" name="town" placeholder="如：牛田镇"></div>
           <div class="form-group"><label>村 / 具体地点</label><input type="text" id="village" name="village" placeholder="如：大冲里村"></div>
-        </div>
-        <div class="location-capture" id="location-capture">
-          <input type="hidden" id="latitude" name="latitude">
-          <input type="hidden" id="longitude" name="longitude">
-          <input type="hidden" id="locationAccuracy" name="locationAccuracy">
-          <input type="hidden" id="locationCapturedAt" name="locationCapturedAt">
-          <button type="button" class="btn btn-outline" id="location-button">获取当前位置</button>
-          <button type="button" class="location-clear" id="location-clear" hidden>清除</button>
-          <div class="location-status" id="location-status">可选：点击获取 GPS 坐标，或在地图上搜索选点。</div>
-        </div>
-
-        <!-- ── 高德地图搜索选点 ── -->
-        <div class="map-picker-wrap" id="map-picker-wrap">
-          <div class="map-search-row">
-            <input type="text" id="map-search-input" placeholder="搜索地点，如：益阳市桃江县牛田镇">
-            <button type="button" id="map-search-button">搜索</button>
-          </div>
-          <div class="map-container" id="map-container" aria-label="地图选点"></div>
         </div>
       </div>
 
@@ -1175,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             var level = g.level;
             mapInstance.setZoomAndCenter(level === '村庄' || level === '乡镇' ? 14 : 12, [lng, lat]);
             setMarker(lng, lat);
+            reverseFillAddress(lng, lat);
             showStatus('已定位：' + g.formattedAddress, 'success');
           } else {
             showStatus('未找到该地点，请尝试更具体的地址', 'error');
