@@ -194,14 +194,15 @@ app.post('/api/admin/delete', async (req, res) => {
 });
 
 // ------- 前端页面 -------
-// UI 版本切换：/?ui=v1 旧版 · /?ui=v2 新版（cookie 记忆，默认新版）
+// UI 版本切换：/?ui=v1 经典 · /?ui=v2 田野暮色 · /?ui=v3 Genesis（cookie 记忆，默认 v3）
 app.get('/', (req, res) => {
+  const VALID = ['v1', 'v2', 'v3'];
   let ui = req.query.ui;
-  if (ui !== 'v1' && ui !== 'v2') {
-    const m = /(?:^|;\s*)ui=(v1|v2)/.exec(req.headers.cookie || '');
-    ui = m ? m[1] : 'v2';
+  if (!VALID.includes(ui)) {
+    const m = /(?:^|;\s*)ui=(v[123])/.exec(req.headers.cookie || '');
+    ui = m ? m[1] : 'v3';
   }
-  const file = ui === 'v1' ? 'index-v1.html' : 'index-v2.html';
+  const file = `index-${ui}.html`;
   let filePath = path.join(__dirname, 'public', file);
   if (!fs.existsSync(filePath)) filePath = path.join(__dirname, 'public', 'index.html');
   res.setHeader('Set-Cookie', `ui=${ui}; Path=/; Max-Age=31536000; SameSite=Lax`);

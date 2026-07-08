@@ -865,7 +865,18 @@
 </div>
 
 <!-- 版本切换 -->
-<a class="ui-switch" href="/?ui=v1" title="切换到经典版界面"><span class="sw-dot"></span>切换旧版</a>
+<div class="ui-switch3">
+  <a href="/?ui=v1">V1</a>
+  <a class="on3">V2</a>
+  <a href="/?ui=v3">V3</a>
+</div>
+<style>
+.ui-switch3{position:fixed;right:18px;bottom:24px;z-index:300;display:inline-flex;align-items:center;gap:2px;background:var(--card);border:1px solid var(--line-strong);border-radius:999px;padding:4px;box-shadow:var(--shadow)}
+.ui-switch3 a{font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:999px;color:var(--ink-faint);cursor:pointer}
+.ui-switch3 a:hover{color:var(--ink)}
+.ui-switch3 a.on3{background:var(--gold);color:#101b12}
+@media (max-width:860px){.ui-switch3{bottom:84px}}
+</style>
 
 <script>
 const API = '';
