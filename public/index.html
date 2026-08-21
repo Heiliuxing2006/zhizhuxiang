@@ -278,80 +278,6 @@
   .about-card ul { list-style: none; display: grid; gap: 8px; margin-top: 6px; }
   .about-card li { display: flex; gap: 10px; font-size: 15px; color: var(--ink-soft); }
   .about-card li .tick { color: var(--clay); font-weight: 700; flex-shrink: 0; }
-
-  /* ===== Articles ===== */
-  .articles-split { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; min-height: 50vh; }
-  .articles-sidebar { position: sticky; top: 90px; }
-  .articles-list { display: grid; gap: 4px; }
-  .article-nav-item {
-    display: flex; gap: 14px; padding: 16px 18px; border-radius: var(--radius-sm);
-    cursor: pointer; transition: all .18s; border: 1px solid transparent; align-items: flex-start;
-  }
-  .article-nav-item:hover { background: var(--forest-soft); }
-  .article-nav-item.active { background: var(--clay-soft); border-color: var(--clay); }
-  .article-nav-item .ani-num {
-    font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--ink-faint);
-    min-width: 28px; padding-top: 2px;
-  }
-  .article-nav-item.active .ani-num { color: var(--clay); }
-  .article-nav-item .ani-text { flex: 1; min-width: 0; }
-  .article-nav-item .ani-text strong {
-    display: block; font-size: 15px; font-weight: 700; color: var(--ink);
-    line-height: 1.3; margin-bottom: 4px;
-  }
-  .article-nav-item.active .ani-text strong { color: var(--clay-deep); }
-  .article-nav-item .ani-text small {
-    font-size: 12px; color: var(--ink-faint); display: block; line-height: 1.4;
-  }
-
-  .articles-body {
-    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
-    padding: clamp(28px,4vw,48px); box-shadow: var(--shadow-sm); min-height: 400px;
-  }
-  .articles-body .art-empty { text-align: center; padding: 80px 20px; color: var(--ink-faint); font-size: 15px; }
-  .articles-body article { animation: fadeIn .3s ease; }
-  .articles-body h1 { font-size: clamp(24px,3.4vw,34px); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; margin-bottom: 8px; }
-  .articles-body .art-subtitle { font-size: 14px; color: var(--ink-faint); margin-bottom: 24px; }
-  .articles-body .art-body { font-size: 16px; line-height: 1.85; color: var(--ink-soft); }
-  .articles-body .art-body h2 { font-size: 21px; font-weight: 700; color: var(--forest-2); margin: 36px 0 14px; letter-spacing: -.01em; }
-  .articles-body .art-body h3 { font-size: 17px; font-weight: 700; color: var(--ink); margin: 26px 0 10px; }
-  .articles-body .art-body p { margin-bottom: 16px; }
-  .articles-body .art-body em { color: var(--forest-2); font-style: italic; }
-  .articles-body .art-body strong { color: var(--ink); }
-  .articles-body .art-body blockquote {
-    border-left: 3px solid var(--clay); padding: 14px 22px; margin: 22px 0;
-    background: var(--clay-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    color: var(--ink); font-size: 15.5px; line-height: 1.75;
-  }
-  .articles-body .art-body blockquote p { margin-bottom: 0; }
-  .articles-body .art-body ul, .articles-body .art-body ol { margin: 10px 0 18px 22px; }
-  .articles-body .art-body li { margin-bottom: 7px; }
-  .articles-body .art-body hr { border: none; border-top: 1px solid var(--line); margin: 30px 0; }
-  .articles-body .art-body table { width: 100%; border-collapse: collapse; margin: 18px 0 22px; font-size: 14px; }
-  .articles-body .art-body th { background: var(--forest); color: #eef2ee; padding: 10px 14px; text-align: left; font-weight: 600; }
-  .articles-body .art-body td { padding: 10px 14px; border-bottom: 1px solid var(--line); }
-  .articles-body .art-body img { max-width: 100%; border-radius: var(--radius-sm); margin: 18px 0; display: block; }
-  .articles-body .art-signature {
-    margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line);
-    font-size: 14px; color: var(--ink-faint); font-style: italic;
-  }
-  .articles-body .art-eyebrow {
-    display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: .05em;
-    color: var(--forest-2); background: var(--forest-soft);
-    padding: 4px 12px; border-radius: 999px; margin-bottom: 16px;
-  }
-
-  @media (max-width: 800px) {
-    .articles-split { grid-template-columns: 1fr; gap: 18px; }
-    .articles-sidebar { position: static; }
-    .articles-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .article-nav-item { padding: 10px 14px; border-radius: 999px; background: var(--paper-2); flex-shrink: 0; }
-    .article-nav-item.active { background: var(--clay); border-color: var(--clay); }
-    .article-nav-item.active .ani-text strong { color: #fff; }
-    .article-nav-item.active .ani-num { color: rgba(255,255,255,.7); }
-    .article-nav-item .ani-text small { display: none; }
-    .article-nav-item .ani-num { min-width: auto; }
-  }
   .about-card strong { color: var(--ink); }
   .about-contact { text-align: center; }
   .about-contact .qr { width: 158px; height: 158px; border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); margin: 14px auto 0; display: block; }
@@ -458,7 +384,6 @@
       <a data-page="home" onclick="switchPage('home')" class="active">首页</a>
       <a data-page="list" onclick="switchPage('list')">收录场地</a>
       <a data-page="case" onclick="switchPage('case')">案例</a>
-      <a data-page="articles" onclick="switchPage('articles')">文章</a>
       <a data-page="about" onclick="switchPage('about')">关于我们</a>
       <a href="/public/grow-kanban.html">养殖看板</a>
       <a class="nav-cta" data-page="submit" onclick="switchPage('submit')">提交场地</a>
@@ -805,53 +730,6 @@
   </div>
 </div>
 
-<!-- ===================== ARTICLES ===================== -->
-<div class="page" id="page-articles">
-  <div class="wrap subpage">
-    <div class="subpage-head reveal">
-      <h1>文章与观点</h1>
-      <p>关于农业、农村与 GROW 品牌农场的实践思考</p>
-    </div>
-    <div class="articles-split" id="articles-split">
-      <!-- ── 左侧文章列表 ── -->
-      <aside class="articles-sidebar">
-        <div class="articles-list" id="articles-nav">
-          <a data-idx="0" class="article-nav-item active" onclick="showArticle(0)">
-            <span class="ani-num">01</span>
-            <span class="ani-text">
-              <strong>这份分红，不分丰年</strong>
-              <small>GROW品牌农场如何让养猪不再看天吃饭</small>
-            </span>
-          </a>
-          <a data-idx="1" class="article-nav-item" onclick="showArticle(1)">
-            <span class="ani-num">02</span>
-            <span class="ani-text">
-              <strong>农民为什么富不起来</strong>
-              <small>驷牧的回答</small>
-            </span>
-          </a>
-          <a data-idx="2" class="article-nav-item" onclick="showArticle(2)">
-            <span class="ani-num">03</span>
-            <span class="ani-text">
-              <strong>与"十五五"同频共振</strong>
-              <small>Grow品牌农场与农业现代化战略契合</small>
-            </span>
-          </a>
-          <a data-idx="3" class="article-nav-item" onclick="showArticle(3)">
-            <span class="ani-num">04</span>
-            <span class="ani-text">
-              <strong>"十五五"农业战略部署</strong>
-              <small>农业农村现代化的国家路线图</small>
-            </span>
-          </a>
-        </div>
-      </aside>
-      <!-- ── 右侧正文 ── -->
-      <main class="articles-body" id="articles-body"></main>
-    </div>
-  </div>
-</div>
-
 <!-- ===================== ABOUT ===================== -->
 <div class="page" id="page-about">
   <div class="wrap subpage">
@@ -958,7 +836,6 @@
   <div class="tabbar-item" data-page="submit" onclick="switchPage('submit')"><span class="tab-icon">📋</span><span>收录</span></div>
   <div class="tabbar-item" data-page="list" onclick="switchPage('list')"><span class="tab-icon">🏘️</span><span>列表</span></div>
   <div class="tabbar-item" data-page="case" onclick="switchPage('case')"><span class="tab-icon">🎬</span><span>案例</span></div>
-  <div class="tabbar-item" data-page="articles" onclick="switchPage('articles')"><span class="tab-icon">📝</span><span>文章</span></div>
   <div class="tabbar-item" data-page="kanban" onclick="location.href='/public/grow-kanban.html'"><span class="tab-icon">📊</span><span>看板</span></div>
   <div class="tabbar-item" data-page="about" onclick="switchPage('about')"><span class="tab-icon">ℹ️</span><span>关于</span></div>
 </div>
@@ -979,33 +856,6 @@ function switchPage(pageId) {
   runReveal();
   if (pageId === 'list') loadList();
   if (pageId === 'home') loadStats();
-  if (pageId === 'articles') { showArticle(0); }
-}
-
-// ── articles ──
-var _currentArticle = -1;
-var ARTICLES = [
-  { title: '这份分红，不分丰年', subtitle: 'GROW品牌农场如何让养猪不再看天吃饭', author: '驷牧品牌观察', body: '<p><strong>江西都昌县韩田村的村支书去年收到了一笔36万元的固定分红。</strong>这不是扶贫慰问金，不是一次性补偿款，而是一份每年都会按时到账的财产性收入——来自村里一个存栏2400头的育肥猪场。</p><p>全村338户、1438人，其中脱贫户34户、低保70人。这个项目让户均年增收超过了5000元。</p><p>这不是慈善，这是一门生意。但当这门生意能跑通的时候，它就不再只是一门生意。</p><h2>猪价涨跌，跟你没关系</h2><p>过去二十年，养猪业最残酷的事实就是：养得好不如行情好。一个家庭农场辛辛苦苦养一栏猪出来，碰上价格低谷，不仅白干，还得倒贴。挣三年亏两年，靠天吃饭，循环往复。无数中小散户就是这么被耗干的。</p><p>但在GROW品牌农场的模式里，这个问题被绕开了。农场和正大集团签的是代养合同：猪苗、饲料、兽药、销售全由正大负责，农场只做一件事——把猪养好。农场本质上就是一个"托猪所"——作为服务类资产出租给大集团运营，按养殖成果收费，不承担市场波动。</p><p>算一笔账：一个场年出栏4800头，年营收120万元，扣掉运营成本约48万，净利润72万元。这笔钱跟猪价没有半毛钱关系。</p><p>这才是关键。当你的收入不需要赌行情的时候，养猪才真正从投机变成了产业。</p><h2>两个人和一座场</h2><p>一个传统猪场要多少人？八到十个。一个GROW农场只要两个人——一名场长加一名饲养员。这不是靠压榨人力，而是靠技术体系撑起来的：全自动精准通风、智能分阶段饲喂、自动刮粪系统。两个人完全管得过来。</p><p>这意味着一个家庭农场不需要雇工，夫妻俩就能运转。意味着每百头猪的用工效率比规模化猪场高出数倍。意味着收入扎扎实实留在本地，而不是被远离农村的资本抽走——而这正是GROW"联农带农"的底层逻辑：不是施舍式的扶贫，是让农户以股权持有者、技术工人的身份参与到产业链里。</p><p>都昌已经跑通了。七个场落地，两个投产、两个在建、两个手续办结。每个场都是整装车模式交付——签约到投产90天，模块化搭建，标准完全统一。存栏2400头、年出栏4800头、存活率98%以上——这些数字不是PPT里的预测，是结算单上实实在在写着的。</p><h2>村集体的49%</h2><p>传统的公司下乡，往往是租块地、建个场、挣完钱走人。村集体拿一笔租金，长期收益为零。GROW的做法不一样：每个农场由驷牧持股51%，村集体（或城投平台）持股49%。村集体不是出租方，是股东。按新项目的统一口径，村集体按出资额享受10%的固定年回报。</p><p>以一个县建10个GROW农场来算，村集体/城投每年固定回报约300万元。这笔钱是稳定的、可预期的财产性收入，通过村集体分配到农民手上——不是一年，是年复一年。</p><p>湖南益阳已经在走这条路线。市政府、驷牧、正大三方签约，全市规划落地100套GROW农场。益阳市城投平台以49%股权参与项目，已申报1.2到1.6亿元的专项债支持。这是全国第一个"GROW模式+政府平台+专项债"的落地样本。</p><p><strong>一个地方要吸引产业投资，最难的不是找一个能盖猪场的人，而是找一个盖完之后不走、赚完钱能分回来的人。</strong>49%的股权结构，就是这道信任难题的答案。</p><h2>粪污——大厂头痛的事，在GROW反而是资产</h2><p>万头级别的大猪场处理粪污是道技术难题，体量大、集中度高、一旦出问题就是生态灾难。GROW的规模恰好踩在一个巧妙的点上：单场存栏2400头，年产粪污5000多吨。这个量级既够规模效益，又不至于集中成灾难。配套400亩消纳地，粪污全量还田变有机肥——农户化肥成本节省30%到50%，农场自己还多一笔有机肥销售收入。</p><p>关键是，这不是纸上谈兵。"冰箱式洁净猪舍"的高密闭设计加上地沟精准除臭系统，场外完全闻不到气味。2025年12月，九江市13个区县的畜牧中心负责人到都昌实地看过，认可了这套体系。后来广东惠东县也专程带队来考察。</p><p>对洞庭湖流域这类生态敏感区来说，这个环保能力不是加分项，是入场券。</p><h2>我们凭什么不做广告？</h2><p>因为不需要。这篇文章的目的不是推销。GROW品牌农场做的事情很简单——找到一种让中小规模养猪能在当下这个行业里活下去、活得稳、还能把收益留在农村的方式。</p><p>都昌已经有338户农户因此获益。益阳的100套农场正在落地。河南信阳、安徽宿松、湖北宜昌的布局也在推进。</p><p><strong>如果你关心的是"养猪这个行业还能不能干"——答案是能，但得换一种干法。</strong></p><p><strong>如果你关心的是"农村的就业和收入怎么办"——GROW正在给出一个已经跑通的答案。</strong></p>'},
-
-  { title: '农民为什么富不起来', subtitle: '驷牧的回答', author: '驷牧集团 · 李心', body: '<p><em>写给所有关心中国三农问题的人</em></p><h2>一、这个问题比你想象的更难</h2><p>"让农民富起来"——这句话喊了几十年。结果如何，大家心里都有数。</p><p>中国著名三农学者温铁军教授在一次访谈中说了一段让人沉默的话：</p><blockquote><p>世界上没有靠农业致富的先例。美国那是农民吗？那是农场主。真正干活的是墨西哥来的劳工，但他们不计入美国农业人口。</p></blockquote><p>这话听起来刺耳，但逻辑严密。农业本身的利润天花板，注定了单靠种地、养猪、种粮，很难让人过上真正富裕的生活。那些看起来"农业发达"的国家和地区，农民的收入往往来自农业之外——来自农产品加工、金融、保险、流通。</p><p>日本是个典型案例。温铁军教授提到，日本农民的人均收入长期高于城市居民，靠的不是卖大米，靠的是<strong>综合农协</strong>。农协把第一产业、第二产业、第三产业全部纳入同一个组织体系。农民加入农协，享受国家给的税收优惠、金融优惠，农协赚到的钱免税返还给农民。</p><p><strong>问题来了：中国农民能这样做吗？</strong>温铁军教授给出了非常直白的答案：<strong>不能</strong>。农民能搞金融吗？立刻被掐死。能搞保险吗？掐死。批发、购销、加工、物流——这些高收益环节，农民单家独户根本做不了，农民组织起来也不被允许。结果就是，每一次讲"让农民致富"，最后都变成了：补贴进了大企业的口袋，合作社大多是拿补贴的空壳，真正的农民被一次次排除在分配体系之外。这不是阴谋论，这是结构性的困境。</p><h2>二、我们在做一件可能有点不一样的事</h2><p>我叫李心，驷牧集团的商务负责人。驷牧集团做的事情，用一句话说：<strong>驷牧自带资金、自带产业、自带订单进村，与村集体合资建设GROW品牌农场，让农民不用养猪也能分到养猪的钱。</strong></p><p>驷牧旗下的GROW品牌农场，是一套标准化的育肥猪场方案。单场投资600万元，存栏2400头，一年出栏约4800头。猪不是农民自己养——我们引入正大集团这样的大型养殖龙头来做"代养"，由他们提供猪苗、饲料和技术支持，驷牧负责建场和运营管理，每头猪收取250元代养费。这些分散在各地的GROW农场，通过驷牧组织的"托猪所联盟"联合起来，统一标准、统一代养、统一分红，形成规模筹码。</p><p>整个过程，老农民不需要出力气，不需要懂养猪技术，甚至不需要每天进场干活。但他们可以分钱。</p><p><strong>合作结构是这样的：</strong>驷牧公司出资51%，当地村集体出资49%，双方合资成立运营公司，共同拥有这个GROW农场。代养费收入产生的利润，按股权比例分配。</p><p>以江西省都昌县韩田村为例：村集体出资300万元，占股49%，每年获得<strong>固定分红36万元</strong>（合同约定，旱涝保收），覆盖全村338户、1438名村民，其中脱贫户34户、低保人口70人，预计带动户均年增收5000元以上。农场雇用2名当地工人，人均年工资收入6-8万元。</p><p>从2025年启动到现在，韩田村集体已经实实在在收到了这笔钱。这不是预测，是已经发生的事实。</p><h2>三、但这只是第一步，真正的故事在后面</h2><p>温铁军教授说的那个日本农协的故事，一直在我脑子里转。单靠代养分红，能让农民富起来吗？可能还不够。代养费市场有波动，单一来源的收入始终脆弱。真正的问题是：<strong>农民能不能进入产业链的中上游？</strong></p><p>我们在想一件事：当GROW农场在全国复制到100个时，这100个场每年消耗饲料约<strong>20万吨</strong>。我们完全可以用这个采购规模去谈判，甚至收购一家饲料厂的股份，或者干脆新建一家。这部分利润，同样让村集体持有49%的股份。</p><p>当100个农场每年稳定出栏约<strong>50万头</strong>优质育肥猪，一般屠宰场的规模是年处理100万头。我们能提供一半的货源——这意味着我们有足够的筹码去收购屠宰厂的股份，进入屠宰加工环节。</p><p>种猪、育肥——饲料生产——屠宰加工——品牌猪肉，这是一条完整的产业链。当这条链上的每一个环节，都有49%的股份属于各个村集体，情况就不一样了。</p><p>不止猪肉。种养循环体系成熟后，GROW农场产出的有机肥可以改善周边农田土壤，带动有机果蔬品牌。这些品牌农产品的利润，同样可以按49%返还村集体。</p><p>我们把这个设想叫做<strong>"大农民计划"</strong>。这跟温铁军教授说的日本农协模式，有没有一点相似的影子？不是靠种地致富，而是靠<strong>组织起来，共同进入那些原本被资本垄断的高利润环节</strong>。</p><h2>四、有几件事我们还不敢说大</h2><p>我不想把这篇文章写成宣传稿。有几件事情，需要说清楚。</p><p><strong>第一，农民能富多少，现在还不好说。</strong>韩田村的36万分红，平摊到338户，每户每年大约多了一千块。这是真实的增量，但离"致富"还有距离。真正的变化要等到规模起来、产业链打通之后。这需要时间，需要资金，也需要运气。</p><p><strong>第二，我们能不能做到100个场，还有很多不确定因素。</strong>政策、资金、合作方，每一个都是变量。目前全国已经投产了5个GROW农场，都昌模式通过了验证，益阳市政府已与我们和正大集团三方签约推进100套，但从"0到1"到"1到100"，是完全不同的挑战。</p><p><strong>第三，这个模式的前提是代养合作稳定。</strong>GROW农场的核心依赖是正大这样的大型养殖集团持续下单代养。如果他们的代养需求出现变化，我们的收益结构就会受影响。这是我们必须持续解决的问题。</p><h2>五、但有一件事，我们相信</h2><p>温铁军教授说：农民不是没有能力，是没有被允许组织起来，进入高收益环节。我们试图做的，是在现有政策允许的框架内，通过"公司+村集体"的合资结构，让农民集体以投资者的身份，进入猪肉产业链——先进代养收益，再进饲料、屠宰，再进品牌农产品。</p><p>这个路径也许走得通，也许走不通。但在江西都昌的韩田村，至少已经走出了第一步。34户脱贫户、70名低保村民，已经开始每年稳定地分享这头"会下蛋的老母鸡"下的蛋。</p><p>如果这件事是对的，那它值得被更多人看见。</p>'},
-
-  { title: '与"十五五"同频共振', subtitle: 'Grow品牌农场与农业现代化战略契合', author: '驷牧集团 | Grow品牌农场', body: '<h2>国策引领：农业现代化的时代命题</h2><p>"十五五"时期，《建议》将加快农业农村现代化列为重大战略任务，明确提出：坚持把解决好"三农"问题作为全党工作重中之重，加快建设农业强国。在"产量产能、生产生态、增产增收"三位一体目标指引下，统筹发展<strong>科技农业、绿色农业、质量农业、品牌农业</strong>，把农业建成现代化大产业。</p><p>政策特别强调：<strong>发展农业适度规模经营</strong>，坚持宜大则大、宜小则小；<strong>完善联农带农机制</strong>，通过保底分红、入股参股、服务带动等方式，让农民深度参与产业发展；<strong>推动农村一二三产业深度融合</strong>，延伸农业产业链、提升价值链。</p><p>Grow品牌农场，正是在这一国家战略框架下应运而生的现代化畜牧养殖解决方案。</p><h2>Grow模式：政策落地的最佳实践</h2><h3>一、适度规模经营——政策的精准响应</h3><p>我国仍有2亿多农户，91%的农户土地经营规模在10亩以下。"大国小农"的国情决定了规模化不能简单求"大"。Grow品牌农场采用<strong>每场2400头/批、一年两批共4800头出栏</strong>的标准化设计，单场投资约600万元。这个规模精心权衡了三个核心要素：</p><table><thead><tr><th>要素</th><th>Grow的答案</th></tr></thead><tbody><tr><td>资本门槛</td><td>600万/场，可接受的社会资本与政府合资规模</td></tr><tr><td>管理半径</td><td>2400头/批，一年两批，一个家庭即可运营</td></tr><tr><td>收益保障</td><td>驷牧承诺固定回报10%或保底分红8%，签约时由村集体选择其一</td></tr></tbody></table><p>既不是散养农户的"小打小闹"，也不是资本巨头的"跑马圈地"——这正是政策倡导的<strong>适度规模经营</strong>在畜牧领域的生动实践。</p><h3>二、联农带农机制——共同富裕的制度设计</h3><p>政策强调"完善联农带农机制，让农民通过入股、务工、分红等多种方式分享增值收益"。Grow的合资模式精准契合这一方向：</p><ul><li>与当地政府/城投公司/村集体合资，不是企业单方面圈地建场</li><li>农民以村集体入股，从"旁观者"变成"合伙人"</li><li>代养模式锁定稳定收益，代养费收入与猪肉市场价格波动脱钩，收益有驷牧托底保障</li><li>年固定回报10%或保底分红8%（签约时由村集体选择其一），远高于传统种养殖和银行存款</li></ul><p>这种模式让农民真正"深度参与产业发展，更多分享产业增值收益"，与政策倡导的联农带农完全一致。</p><h3>三、科技农业与质量农业——工业化的养殖标准</h3><p>"十五五"要求统筹发展科技农业、质量农业、品牌农业。Grow品牌农场从设计到运营，全程贯彻工业化思维：标准化场房设计，通风、温控、排污、生物安全体系化集成；科学饲喂管理，精准配方、智能环控、数据化养殖档案；全链条品控，从仔猪进场到育肥出栏全程可追溯；环保达标，粪污资源化利用，种养结合循环农业。</p><p>这不是传统意义上的"养猪"，而是用<strong>工业化的精度</strong>做农业——这正是"把农业建成现代化大产业"的题中之义。</p><h3>四、品牌农业——从"养得好"到"卖得好"</h3><p>"十五五"首次将"品牌农业"列入战略目标。Grow品牌农场的逻辑是：统一标准→统一品质→统一品牌→品牌溢价。每一座Grow农场都是标准化产品，出栏生猪品质统一可控，为品牌化运营奠定了基础。在消费者越来越关注食品安全的今天，"Grow出品"本身就是品质承诺。</p><h2>从一到千：可复制的乡村振兴基础设施</h2><p>Grow品牌农场已建成6座，完成了从0到1的验证。下一步是：<strong>100座→300座→1000+座</strong>。这不是简单的数量增长，而是一套可复制的乡村振兴基础设施。</p><p><strong>对地方政府：</strong>匹配"十五五"产业发展和乡村振兴考核要求，提供标准化、可落地的产业项目。<strong>对村集体：</strong>一个Grow农场就是一座"产业车间"，让村集体有了持续造血能力。<strong>对农民：</strong>"家门口就业"——不背井离乡，年收入有保障，真正实现"就地过上现代文明生活"。<strong>对区域发展：</strong>政策鼓励东部创新引领、中部承接产业、西部特色发展。Grow模式适配不同区域的资源禀赋，为各地推动农业现代化提供了可复用的解决方案。</p><h2>政策契合度全景</h2><table><thead><tr><th>"十五五"农业战略要点</th><th>Grow品牌农场的对应实践</th></tr></thead><tbody><tr><td>发展农业适度规模经营</td><td>2400头/批标准化设计，适度而不盲目求大</td></tr><tr><td>完善联农带农机制</td><td>政府/城投/村集体合资，农民入股分红</td></tr><tr><td>促进农民稳定增收</td><td>驷牧托底：固定回报10%或保底分红8%，脱离市场波动</td></tr><tr><td>统筹科技、绿色、质量、品牌农业</td><td>工业化标准养殖+环保循环+全程品控+品牌运营</td></tr><tr><td>推动农村一二三产业融合</td><td>养殖+加工+销售一体化，延伸产业链</td></tr><tr><td>鼓励人才、资金和技术下乡</td><td>社会资本+政府引导+专业技术输出的合资模式</td></tr><tr><td>常态化防止返贫致贫</td><td>为欠发达地区提供稳定产业项目和就业岗位</td></tr><tr><td>区域协调发展</td><td>标准化模块可在东中西东北各区域复制推广</td></tr></tbody></table><h2>结语：与国家战略同频，与乡土中国共生长</h2><p>"十五五"的农业蓝图不是挂在墙上的口号，而是需要千万个落地项目来填实的系统工程。Grow品牌农场，既是政策的具体践行者，也是政策的受益者。</p><p><strong>当国家说"加快建设农业强国"，Grow用每一座标准化农场作答。当国家说"让农民就地过上现代文明生活"，Grow用每份72万的年代养收入兑现。</strong></p><p>从6到100，从100到1000——Grow品牌农场正在成为中国畜牧业现代化的一条可复制路径，与"十五五"战略同频共振，与乡土中国共同生长。</p>'}
-,
-  { title: '"十五五"农业战略部署', subtitle: '农业农村现代化的国家路线图', author: '中央党校经济学教研部 · 曹立教授', body: '<h2>一、战略定位：农业现代化关乎中国式现代化全局</h2>\n\n<p>农业农村现代化关系中国式现代化的全局和成色。《建议》明确提出：坚持把解决好"三农"问题作为全党工作重中之重，促进城乡融合发展，持续巩固拓展脱贫攻坚成果，推动农村基本具备现代生活条件，加快建设农业强国。</p>\n\n<p>农业保的是生命安全、生存安全，是极端重要的国家安全。从世界百年未有之大变局看，稳住农业基本盘、守好"三农"基础，是应变局、开新局的"压舱石"。对于我们这样一个拥有14亿人口的大国来说，"三农"向好，全局主动。只有实现农业现代化，才能牢牢掌握粮食安全主动权，确保发展底气与战略主动。</p>\n\n<h2>二、提升农业综合生产能力和质量效益</h2>\n\n<h3>（一）藏粮于地，守好"命根子"</h3>\n\n<p>我国粮食产量连续9年稳定在1.3万亿斤以上，去年首次突破1.4万亿斤，人均粮食占有量达到500公斤。但依旧要坚决严守18.65亿亩耕地、15.46亿亩永久基本农田保护红线，同时大力推进高标准农田建设，用更少的水、更少的药肥，种出更多更好的粮。</p>\n\n<h3>（二）藏粮于技，用好"金种子"</h3>\n\n<p>种子是农业的"芯片"。水稻、小麦两大口粮作物育种水平居世界前列，玉米种源自给率94%，做到了"中国粮"主要用"中国种"。自主选育蔬菜品种市场占有率91%，畜禽核心种源自给率超过75%，水产核心种源自给率超过85%。但仍须下决心推进种业振兴，培育出我们自己的高产、优质、抗病的好品种。</p>\n\n<h3>（三）主攻单产和品质提升</h3>\n\n<p>坚持稳面积、提单产，把粮食增产的重心放到大面积提高单产上。总的路径是促进良田、良种、良机、良法集成增效，持续提升粮食产能。</p>\n\n<h3>（四）构建多元化食物供给体系</h3>\n\n<p>树立大食物观，构建多元化食物供给体系。在保护好生态环境前提下，从耕地资源向整个国土资源拓展，从传统农作物和畜禽资源向更丰富的生物资源拓展，向森林、草原、江河湖海要食物，向植物、动物、微生物要热量、要蛋白。</p>\n\n<h2>三、发展农业适度规模经营</h2>\n\n<p>现阶段我国仍有2亿多农户，全国土地经营规模10亩以下的农户数仍占91%，人均一亩三分地、户均不过十亩田的小规模生产方式，是我国农业现代化需要长期面对的现实。</p>\n\n<p>健全具有中国特色的现代农业经营体系，必须立足"大国小农"基本国情农情，坚持宜大则大、宜小则小，完善便捷高效的农业社会化服务体系，促进小农与现代农业发展有机衔接。</p>\n\n<p>稳定土地承包关系也是关键举措——稳步推进二轮承包到期后再延长三十年试点。从农村改革之初的第一轮土地承包算起，第二轮土地承包到期后再延长30年，土地承包关系将保持稳定长达75年，既体现了长久不变的政策要求，又在时间节点上同实现第二个百年奋斗目标相契合。</p>\n\n<h2>四、"十五五"三位一体目标：产量产能、生产生态、增产增收</h2>\n\n<p>"十五五"时期，目标聚焦"产量产能、生产生态、增产增收"三位一体，统筹发展<strong>科技农业、绿色农业、质量农业、品牌农业</strong>，把农业建成现代化大产业。</p>\n\n<h2>五、推进宜居宜业和美乡村建设</h2>\n\n<p>习近平总书记指出：农村现代化是建设农业强国的内在要求和必要条件，建设宜居宜业和美乡村是农业强国的应有之义。要深入学习运用"千万工程"经验，扎实推进乡村建设。</p>\n\n<h3>（一）建设"宜居"乡村</h3>\n\n<p>聚焦农民关切的突出问题，持续推进农村"厕所革命"、生活垃圾和污水治理、村容村貌提升，加快补齐农村污水管网、现代生活条件短板，创造生态优美、整洁有序、便利舒适的乡村优质生活空间。《建议》强调要"以钉钉子精神解决好农村改厕、垃圾围村等问题"。</p>\n\n<p>"十四五"期间建设成效显著：农村公路总里程达546万公里，农村自来水普及率达94%，规模化供水工程覆盖农村人口比例达65%。</p>\n\n<h3>（二）建设"宜业"乡村</h3>\n\n<p>发展乡村特色产业是推进乡村全面振兴的基础。重点是做好"土特产"文章，立足资源特色，开发农业多种功能、挖掘乡村多元价值，分层分类培育壮大农业龙头企业和链主企业，大力培育乡村优势特色产业集群，因地制宜发展乡村特色产业，加快发展乡村旅游、休闲观光、农村电商等新产业新业态，推动农村一二三产业深度融合，延伸农业产业链、提升价值链。</p>\n\n<p>完善<strong>联农带农机制</strong>，通过保底分红、入股参股、服务带动等方式，让农民深度参与产业发展，更多分享产业增值收益，促进农民稳定增收。</p>\n\n<h3>（三）建设"和美"乡村</h3>\n\n<p>农业农村现代化不光看农民的腰包鼓不鼓，还要看农民的精神面貌好不好。要完善党组织领导的自治、法治、德治相结合的乡村治理体系，深入实施文明乡风建设工程，用好积分制、清单制等有效抓手，发挥村规民约和村民议事会、红白理事会等作用，推进移风易俗，引导形成文明乡风、良好家风、淳朴民风。</p>\n\n<h2>六、促进农民增收与城乡融合</h2>\n\n<h3>（一）拓展增收渠道</h3>\n\n<p>据预测，到2035年左右，我国城镇化率将达75%左右，届时依然有25%、近3.5亿人口长期生活在农村，做好"三农"工作任重而道远。要大力发展乡村特色产业，推动农产品加工、乡村旅游、农村电商等新业态，让农民在产业链上获得更多收益；完善"公司+合作社+农户"等联农带农机制，让农民通过入股、务工、分红等多种方式分享增值收益。</p>\n\n<h3>（二）强化政策兜底</h3>\n\n<p>稳定和完善强农惠农富农政策，落实好种粮补贴、粮食最低收购价、农业保险等政策，让种粮农民不吃亏、有钱赚。</p>\n\n<h3>（三）促进城乡融合</h3>\n\n<p>打通城乡要素流动的堵点，鼓励人才、资金和技术下乡，并坚决保障进城落户农民的合法权益，让他们能进退有据，在城乡之间自由选择。</p>\n\n<h2>七、持续巩固拓展脱贫攻坚成果</h2>\n\n<p>"十五五"时期巩固拓展脱贫攻坚成果将转入常态化帮扶阶段。《建议》提出，统筹建立常态化防止返贫致贫机制，坚持精准帮扶，完善兜底式保障，强化开发式帮扶，增强内生动力，分层分类帮扶欠发达地区，健全乡村振兴重点帮扶县支持政策，确保不发生规模性返贫致贫。</p>\n\n<p>中央已经印发了《关于统筹建立常态化防止返贫致贫机制促进乡村全面振兴的意见》，总体要求保持过渡期后政策总体稳定，把常态化帮扶纳入乡村振兴战略统筹实施，以有力有效的开发式帮扶增强内生发展动力。</p>\n\n<h2>八、优化区域经济布局，促进协调发展</h2>\n\n<p>区域协调发展是中国式现代化的内在要求。《建议》明确提出，发挥区域协调发展战略、区域重大战略、主体功能区战略、新型城镇化战略叠加效应，优化重大生产力布局，发挥重点区域增长极作用，构建优势互补、高质量发展的区域经济布局和国土空间体系。</p>\n\n<ul><li><strong>东部地区</strong>：当好高质量发展的"先锋队"，在科技创新和制度开放上探索新路</li>\n<li><strong>中部地区</strong>：发挥承东启西的区位优势和产业基础，建设现代化产业体系</li>\n<li><strong>西部地区</strong>：在筑牢生态屏障的同时，大力发展特色优势产业，把巨大潜力转化为现实动力</li>\n<li><strong>东北地区</strong>：全面深化改革，激发内生动力，在维护国家粮食安全、生态安全中展现新担当</li>\n</ul>\n<p>对革命老区、民族地区、边疆地区等，给予更精准的政策支持，确保在现代化道路上不掉队。</p>'}
-];
-
-function showArticle(idx) {
-  if (_currentArticle === idx) return;
-  _currentArticle = idx;
-  var navItems = document.querySelectorAll('#articles-nav .article-nav-item');
-  navItems.forEach(function(el) { el.classList.remove('active'); });
-  navItems[idx] && navItems[idx].classList.add('active');
-  var body = document.getElementById('articles-body');
-  var a = ARTICLES[idx];
-  body.innerHTML = '<article><span class="art-eyebrow">' + a.author + '</span><h1>' + a.title + '</h1><p class="art-subtitle">' + a.subtitle + '</p><div class="art-body">' + a.body + '</div><div class="art-signature">' + a.author + '</div></article>';
-  if (window.innerWidth < 800) {
-    body.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
 }
 
 // ── toast ──
