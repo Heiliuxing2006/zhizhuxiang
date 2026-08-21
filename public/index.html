@@ -1238,5 +1238,12 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 });
 </script>
+
+<style>
+.ui-switch{position:fixed;right:18px;bottom:24px;z-index:300;display:inline-flex;align-items:center;gap:7px;background:var(--card);color:var(--ink);border:1px solid var(--line);font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s}
+.ui-switch:hover{transform:translateY(-2px)}
+.ui-switch .sw-dot{width:8px;height:8px;border-radius:50%;background:var(--clay)}
+@media (max-width:860px){.ui-switch{bottom:84px}}
+</style>
 </body>
 </html>

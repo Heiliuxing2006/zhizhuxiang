@@ -196,11 +196,11 @@ app.post('/api/admin/delete', async (req, res) => {
 // ------- 前端页面 -------
 // UI 版本切换：v1 经典 · v2 田野暮色 · v3 Genesis · v4 实景讲述（cookie 记忆，默认 v4）
 app.get('/', (req, res) => {
-  const VALID = ['v1', 'v2', 'v3', 'v4'];
+  const VALID = ['v1'];
   let ui = req.query.ui;
   if (!VALID.includes(ui)) {
-    const m = /(?:^|;\s*)ui=(v[1234])/.exec(req.headers.cookie || '');
-    ui = m ? m[1] : 'v4';
+    const m = /(?:^|;\s*)ui=(v1)/.exec(req.headers.cookie || '');
+    ui = m ? m[1] : 'v1';
   }
   const file = `index-${ui}.html`;
   let filePath = path.join(__dirname, 'public', file);
