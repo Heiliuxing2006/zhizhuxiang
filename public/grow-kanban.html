@@ -571,17 +571,17 @@ function fmt(n,d=0){return n!=null?n.toLocaleString('zh-CN',{minimumFractionDigi
 function fmtMoney(n){return n!=null?'¥'+(n/10000).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1})+'万':'—'}
 function fmtPct(n,d=1){return n!=null?n.toFixed(d)+'%':'—'}
 
-// 派生计算
-// 派生计算（在养/未出栏批次的饲养天数按真实今天实时重算，已出栏/已结算不动）
-const allBatches = farmData.farms.flatMap(f=>f.batches.map(b=>{
-  const bb={...b,farmId:f.id,farmName:f.name,county:f.county,village:f.village};
-  if(bb.status==='raising' && !bb.outDate){
-    const inD=new Date(bb.inDate.replace(/-/g,'/'));
+// 在养/未出栏批次的饲养天数按真实今天实时重算（已出栏/已结算批次有 outDate，保持不变）
+farmData.farms.forEach(f=>f.batches.forEach(b=>{
+  if(b.status==='raising' && !b.outDate){
+    const inD=new Date(b.inDate.replace(/-/g,'/'));
     const T=new Date(TODAY.replace(/-/g,'/'));
-    bb.feedDays=Math.max(0,Math.round((T-inD)/86400000));
+    b.feedDays=Math.max(0,Math.round((T-inD)/86400000));
   }
-  return bb;
 }));
+
+// 派生计算
+const allBatches = farmData.farms.flatMap(f=>f.batches.map(b=>({...b,farmId:f.id,farmName:f.name,county:f.county,village:f.village})));
 const settledBatches = allBatches.filter(b=>b.status==='settled'&&b.outCount&&b.fee);
 const raisingBatches = allBatches.filter(b=>b.status==='raising');
 const outBatches = allBatches.filter(b=>b.status==='out');
