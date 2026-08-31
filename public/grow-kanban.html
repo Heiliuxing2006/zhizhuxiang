@@ -502,7 +502,7 @@ footer.site p,footer.site li{color:var(--muted);font-size:14.5px}
       </div>
     </div>
     <div class="foot-base">
-      <span>驷牧集团 · Grow品牌农场养殖成绩看板 V2 · 数据更新：2026-08-18</span>
+      <span>驷牧集团 · Grow品牌农场养殖成绩看板 V2 · 数据更新：<span id="dataUpdateLabel">—</span></span>
       <span>智猪侠 · 托猪所联盟</span>
     </div>
   </div>
@@ -510,7 +510,8 @@ footer.site p,footer.site li{color:var(--muted);font-size:14.5px}
 
 <script>
 // ===================== 数据定义 =====================
-const TODAY = "2026-08-18";
+// 今日红线：实时取当前日期（浏览器端 new Date()），不再写死，每天自动右移
+const TODAY = (()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;})();
 
 const farmData = {
   farms: [
@@ -571,7 +572,16 @@ function fmtMoney(n){return n!=null?'¥'+(n/10000).toLocaleString('zh-CN',{minim
 function fmtPct(n,d=1){return n!=null?n.toFixed(d)+'%':'—'}
 
 // 派生计算
-const allBatches = farmData.farms.flatMap(f=>f.batches.map(b=>({...b,farmId:f.id,farmName:f.name,county:f.county,village:f.village})));
+// 派生计算（在养/未出栏批次的饲养天数按真实今天实时重算，已出栏/已结算不动）
+const allBatches = farmData.farms.flatMap(f=>f.batches.map(b=>{
+  const bb={...b,farmId:f.id,farmName:f.name,county:f.county,village:f.village};
+  if(bb.status==='raising' && !bb.outDate){
+    const inD=new Date(bb.inDate.replace(/-/g,'/'));
+    const T=new Date(TODAY.replace(/-/g,'/'));
+    bb.feedDays=Math.max(0,Math.round((T-inD)/86400000));
+  }
+  return bb;
+}));
 const settledBatches = allBatches.filter(b=>b.status==='settled'&&b.outCount&&b.fee);
 const raisingBatches = allBatches.filter(b=>b.status==='raising');
 const outBatches = allBatches.filter(b=>b.status==='out');
@@ -923,6 +933,9 @@ renderGantt();
 renderFarmCards();
 renderMetrics();
 renderInsights();
+// 页脚“数据更新”显示为真实今天（前端实时）
+const _dl=document.getElementById('dataUpdateLabel');
+if(_dl)_dl.textContent=TODAY;
 </script>
 </body>
 </html>
