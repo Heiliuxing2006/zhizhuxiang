@@ -320,6 +320,14 @@ td .muted{color:var(--ink-faint)}
 .basis-list{display:grid;gap:8px;margin-top:6px}
 .basis-list div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;font-size:13px;color:var(--ink-soft)}
 
+.m3d-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.m3d-bar .hint{font-size:12.5px;color:var(--ink-faint)}
+.m3d-bar .btn-today{text-decoration:none}
+.m3d{position:relative;overflow:hidden;height:clamp(460px,calc(100dvh - 330px),820px);background:#8ab4d8}
+.m3d iframe{display:block;width:100%;height:100%;border:0}
+.m3d-ph{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:14px;font-weight:600;background:#8ab4d8;transition:opacity .3s}
+.m3d-ph.hide{opacity:0;pointer-events:none}
+.m3d-note{font-size:12px;color:var(--ink-faint);margin-top:10px}
 footer.foot{border-top:1px solid var(--line);padding-block:22px;color:var(--ink-faint);font-size:12px}
 </style>
 </head>
@@ -347,6 +355,7 @@ footer.foot{border-top:1px solid var(--line);padding-block:22px;color:var(--ink-
     <button class="tab-btn active" data-page="today">今日进度</button>
     <button class="tab-btn" data-page="plan">计划对比</button>
     <button class="tab-btn" data-page="photos">形象进度</button>
+    <button class="tab-btn" data-page="model3d">3D 演示</button>
     <button class="tab-btn" data-page="nodes">节点与协调</button>
     <span class="tabs-meta">牛田镇大冲里 GROW 农场 2 栋 · 数据截至 9月11日 第九次例会</span>
   </div>
@@ -459,6 +468,25 @@ footer.foot{border-top:1px solid var(--line);padding-block:22px;color:var(--ink-
     <div class="aerial" id="aerial"></div>
     <div class="barn-grid" id="barns"></div>
     <div id="photoFeed"></div>
+  </div>
+</section>
+
+<!-- ====== 3D 演示 ====== -->
+<section class="page" id="page-model3d">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>整场<em>3D 演示</em></h2>
+      <p>按建设布局图（2026年6月1日版）和各单体建施图建模。拖动旋转，滚轮或双指缩放，右键平移，底部按钮切换视角。</p>
+    </div>
+    <div class="m3d-bar">
+      <span class="hint">含猪舍、洗消房、洗消宿舍、料塔、蓄水池、环保区、道路和用地边界</span>
+      <a class="btn-today" href="/public/taojiang-3d.html" target="_blank" rel="noopener">新窗口全屏打开</a>
+    </div>
+    <div class="panel m3d">
+      <iframe id="m3dFrame" title="桃江 Grow 场 3D 效果图" allow="fullscreen"></iframe>
+      <div class="m3d-ph" id="m3dPh">3D 模型加载中</div>
+    </div>
+    <p class="m3d-note">猪舍屋脊高 5.5 m、洗消宿舍脊高、料塔高约 7.7 m、晾粪棚高度为按常规推算的假定值，以施工图为准。</p>
   </div>
 </section>
 
@@ -997,6 +1025,7 @@ function showPage(p) {
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.page === p));
   document.querySelectorAll(".page").forEach(s => s.classList.toggle("active", s.id === "page-" + p));
   if (p === "plan") renderGantt();
+  if (p === "model3d" && !$("m3dFrame").getAttribute("src")) $("m3dFrame").src = "/public/taojiang-3d.html";
 }
 document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
   history.replaceState(null, "", "#" + b.dataset.page); showPage(b.dataset.page); window.scrollTo({ top: 0 });
@@ -1034,6 +1063,7 @@ document.addEventListener("mousemove", e => {
   tipEl.classList.add("show");
 });
 
+$("m3dFrame").addEventListener("load", () => { if ($("m3dFrame").getAttribute("src")) $("m3dPh").classList.add("hide"); });
 renderAll();
 renderBarns();
 showPage((location.hash || "#today").slice(1));
