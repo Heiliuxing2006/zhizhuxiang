@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>桃江 GROW 项目 · 施工进度看板 | 智猪侠</title>
+<style>
+/* ============ 智猪侠 设计令牌（与官网、养殖看板一致） ============ */
+:root{
+  --paper:#f6f4ee; --paper-2:#efece3; --card:#ffffff;
+  --ink:#1f2420; --ink-soft:#4a534c; --ink-faint:#79817a;
+  --line:#ddd9cd; --forest:#24433a; --forest-2:#2f5749; --forest-soft:#e3ebe5;
+  --clay:#b4582d; --clay-deep:#973f1d; --clay-soft:#f2e2d8;
+  --err:#c0432b; --err-soft:#f6e0da;
+  --ok:#2f7d4f; --ok-soft:#dcebe1;
+  --todo:#d9d5c9; --ghost:#b9b4a6;
+  --radius:16px; --radius-sm:10px;
+  --shadow-sm:0 4px 16px rgba(36,67,58,.08);
+  --maxw:1180px;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141816; --paper-2:#1b201d; --card:#1d231f;
+    --ink:#ecefe9; --ink-soft:#b4bcb4; --ink-faint:#828a82;
+    --line:#2b322d; --forest:#4f8472; --forest-2:#5d9582; --forest-soft:#1d2a25;
+    --clay:#d9764a; --clay-deep:#c25f33; --clay-soft:#2a201a;
+    --err:#e2715a; --err-soft:#33201b;
+    --ok:#5fb37f; --ok-soft:#1c2b22;
+    --todo:#343c36; --ghost:#5a625b;
+    --shadow-sm:0 4px 16px rgba(0,0,0,.35);
+  }
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.7;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+@media(max-width:640px){.wrap{padding:0 16px}}
+button{font-family:inherit}
+
+/* ===== 顶部导航（与智猪侠官网一致） ===== */
+header.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:saturate(140%) blur(12px);-webkit-backdrop-filter:saturate(140%) blur(12px);border-bottom:1px solid var(--line)}
+.nav-inner{height:66px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.brand .mark{width:34px;height:34px;border-radius:9px;overflow:hidden;display:grid;place-items:center;background:var(--forest)}
+.brand .mark img{width:100%;height:100%;object-fit:cover}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{color:var(--ink-soft);font-size:15px;font-weight:500;transition:color .2s;text-decoration:none;cursor:pointer}
+.nav-links a:hover,.nav-links a.active{color:var(--clay)}
+.nav-cta{background:var(--clay);color:#fff!important;padding:9px 18px;border-radius:999px;font-weight:600;font-size:14.5px}
+.nav-cta:hover{background:var(--clay-deep)}
+@media(max-width:860px){.nav-links a:not(.nav-cta){display:none}}
+
+/* ===== 栏目内分页标签 ===== */
+.kanban-tabs{position:sticky;top:66px;z-index:40;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.kanban-tabs .wrap{display:flex;gap:6px;overflow-x:auto;padding-top:10px;padding-bottom:10px;align-items:center}
+.kanban-tabs .wrap::-webkit-scrollbar{display:none}
+.tab-btn{background:none;border:1.5px solid var(--line);color:var(--ink-soft);font-size:13.5px;padding:7px 16px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s,border-color .2s;white-space:nowrap;flex-shrink:0}
+.tab-btn:hover{color:var(--ink);border-color:var(--forest-2)}
+.tab-btn.active{color:#fff;background:var(--clay);border-color:var(--clay)}
+.tab-btn:active{transform:translateY(1px)}
+.tabs-meta{margin-left:auto;font-size:12px;color:var(--ink-faint);white-space:nowrap;padding-left:12px}
+@media(max-width:760px){.tabs-meta{display:none}}
+
+/* ===== 页面容器 ===== */
+.page{display:none;padding-top:28px;padding-bottom:64px;min-height:60vh}
+.page.active{display:block}
+@media (prefers-reduced-motion: no-preference){.page.active{animation:fadeIn .3s cubic-bezier(.16,1,.3,1)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.sec-head{margin-bottom:20px}
+.sec-head h2{font-size:clamp(22px,3vw,30px);font-weight:800;letter-spacing:-.02em;line-height:1.3}
+.sec-head h2 em{font-style:normal;color:var(--clay)}
+.sec-head p{color:var(--ink-soft);font-size:14px;margin-top:6px;max-width:72ch}
+.sub-head{font-size:16px;font-weight:700;margin:34px 0 12px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sub-head small{font-size:12px;color:var(--ink-faint);font-weight:400}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm)}
+
+/* ===== 日期切换 ===== */
+.datebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.datebar .ctrl{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:999px;background:var(--card);overflow:hidden}
+.datebar button.step{background:none;border:0;color:var(--ink-soft);width:38px;height:36px;cursor:pointer;font-size:16px}
+.datebar button.step:hover{color:var(--clay);background:var(--paper-2)}
+.datebar input[type=date]{border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px var(--sans);padding:0 10px;height:36px;color-scheme:light dark}
+.datebar input[type=date]:focus-visible,.datebar button:focus-visible,.tab-btn:focus-visible,.chip:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+.btn-today{border:1.5px solid var(--clay);color:var(--clay);background:transparent;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-today:hover{background:var(--clay-soft)}
+.btn-today[hidden]{display:none}
+.datebar .hint{font-size:12.5px;color:var(--ink-faint)}
+.future-note{font-size:12.5px;color:var(--clay-deep);background:var(--clay-soft);border-radius:999px;padding:4px 12px}
+@media (prefers-color-scheme: dark){.future-note{color:var(--clay)}}
+
+/* ===== 今日摘要 ===== */
+.today-lead{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.today-lead{grid-template-columns:1fr}}
+.lead-card{padding:22px 24px}
+.lead-date{font-size:13px;color:var(--ink-faint)}
+.lead-title{font-size:clamp(20px,2.6vw,26px);font-weight:800;letter-spacing:-.02em;line-height:1.35;margin:4px 0 10px}
+.lead-title em{font-style:normal;color:var(--clay)}
+.lead-body{color:var(--ink-soft);font-size:14px;max-width:60ch}
+.pace{margin-top:18px;display:grid;gap:10px}
+.pace-row{display:grid;grid-template-columns:92px 1fr 52px;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-soft)}
+.pace-bar{height:10px;border-radius:999px;background:var(--paper-2);position:relative;overflow:hidden}
+.pace-bar i{position:absolute;inset:0 auto 0 0;border-radius:999px}
+.pace-row b{font-weight:700;color:var(--ink);text-align:right}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+.kpi{background:var(--card);padding:16px 18px;min-height:112px}
+.kpi-lbl{font-size:12px;color:var(--ink-soft)}
+.kpi-val{font-size:28px;font-weight:800;line-height:1.25;letter-spacing:-.02em;margin-top:2px}
+.kpi-val small{font-size:13px;font-weight:600;color:var(--ink-soft);margin-left:3px}
+.kpi-val.red{color:var(--err)}.kpi-val.clay{color:var(--clay)}.kpi-val.ok{color:var(--ok)}
+.kpi-note{font-size:11.5px;color:var(--ink-faint);margin-top:2px;line-height:1.5}
+
+/* ===== 今日在施 ===== */
+.today-grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.today-grid{grid-template-columns:1fr}}
+.list-card{padding:6px 0}
+.list-card h3{font-size:15px;font-weight:700;padding:14px 20px 6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.list-card h3 small{font-weight:400;font-size:12px;color:var(--ink-faint)}
+.task{padding:12px 20px;border-top:1px solid var(--line)}
+.task:first-of-type{border-top:0}
+.task-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.grp{font-size:11.5px;color:var(--forest-2);background:var(--forest-soft);border-radius:6px;padding:0 7px;white-space:nowrap}
+.task-name{font-weight:700;font-size:14.5px}
+.delay{margin-left:auto;font-size:12.5px;font-weight:700;white-space:nowrap}
+.delay.late{color:var(--err)}.delay.ontime{color:var(--ok)}.delay.unk{color:var(--ink-faint);font-weight:500}
+.prog{display:grid;grid-template-columns:1fr 48px;align-items:center;gap:10px;margin-top:8px}
+.prog-track{position:relative;height:12px;border-radius:999px;background:var(--paper-2)}
+.prog-fill{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--clay)}
+.prog-base{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink-faint);border-radius:2px}
+.prog-pct{font-weight:800;font-size:15px;text-align:right}
+.task-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-faint);margin-top:5px}
+.task-meta b{color:var(--ink-soft);font-weight:600}
+.basis{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--ink-soft);white-space:nowrap}
+.basis.M{border-color:color-mix(in srgb,var(--clay) 45%,var(--line));color:var(--clay-deep)}
+@media (prefers-color-scheme: dark){.basis.M{color:var(--clay)}}
+.basis.U{border-style:dashed}
+.empty{padding:22px 20px;color:var(--ink-faint);font-size:13px}
+
+.mini{padding:10px 20px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 10px}
+.mini:first-of-type{border-top:0}
+.mini .n{font-weight:600;font-size:13.5px}
+.mini .d{font-size:12px;color:var(--ink-faint);grid-column:1/2}
+.mini .r{grid-row:1/3;grid-column:2;align-self:center;font-weight:700;font-size:13px;text-align:right}
+.mini .r.late{color:var(--err)}
+
+/* ===== 延后对比（哑铃图） ===== */
+.slip{padding:18px 20px 12px;overflow-x:auto}
+.slip-inner{min-width:760px}
+.slip-axis,.slip-row{display:grid;grid-template-columns:210px 1fr 64px;align-items:center}
+.slip-axis{height:26px;font-size:11px;color:var(--ink-faint)}
+.slip-scale{position:relative;height:100%}
+.slip-scale span{position:absolute;top:4px;transform:translateX(-50%);white-space:nowrap}
+.slip-row{height:34px;border-top:1px solid var(--line)}
+.slip-row .lbl{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px}
+.slip-row .lbl small{font-weight:400;color:var(--ink-faint);margin-right:6px}
+.slip-track{position:relative;height:100%}
+.slip-grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.slip-line{position:absolute;top:50%;height:3px;margin-top:-1.5px;background:var(--err);opacity:.55;border-radius:2px}
+.slip-dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%}
+.slip-dot.base{background:var(--card);border:2px solid var(--ghost)}
+.slip-dot.cur{background:var(--err)}
+.slip-dot.cur.same{background:var(--ok)}
+.slip-today{position:absolute;top:0;bottom:0;width:2px;background:var(--clay);opacity:.8}
+.slip-row .val{text-align:right;font-weight:800;color:var(--err);font-size:14px}
+.slip-row .val.zero{color:var(--ok);font-weight:600;font-size:12.5px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);padding:10px 0 2px}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.lg-base{width:10px;height:10px;border-radius:50%;border:2px solid var(--ghost)}
+.lg-cur{width:10px;height:10px;border-radius:50%;background:var(--err)}
+.lg-bar-base{width:22px;height:5px;border-radius:3px;background:var(--ghost)}
+.lg-bar-done{width:22px;height:10px;border-radius:3px;background:var(--ok)}
+.lg-bar-doing{width:22px;height:10px;border-radius:3px;background:var(--clay)}
+.lg-bar-todo{width:22px;height:10px;border-radius:3px;background:var(--forest-2);opacity:.45}
+.lg-today{width:2px;height:14px;background:var(--clay)}
+
+/* ===== 甘特图 ===== */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.chip{background:var(--card);border:1.5px solid var(--line);color:var(--ink-soft);font-size:13px;padding:5px 13px;border-radius:999px;cursor:pointer}
+.chip:hover{color:var(--ink);border-color:var(--forest-2)}
+.chip.on{background:var(--forest);border-color:var(--forest);color:#fff}
+.toolbar .sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.gantt{overflow:auto;max-height:78vh;position:relative}
+.g-inner{position:relative}
+.g-row{display:flex;height:36px;border-top:1px solid var(--line)}
+.g-row.head{height:44px;position:sticky;top:0;z-index:4;background:var(--card);border-top:0;border-bottom:1px solid var(--line)}
+.g-row.group{height:32px;background:var(--paper-2)}
+.g-lbl{position:sticky;left:0;z-index:3;width:220px;flex-shrink:0;background:var(--card);border-right:1px solid var(--line);padding:0 12px;display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap;overflow:hidden}
+.g-row.group .g-lbl{background:var(--paper-2);font-weight:700;color:var(--forest-2)}
+.g-row.group .g-lbl small{font-weight:400;color:var(--ink-faint)}
+.g-row.head .g-lbl{z-index:5;font-size:12px;color:var(--ink-faint)}
+.g-lbl .t{overflow:hidden;text-overflow:ellipsis}
+.g-lbl .flag{font-size:10.5px;color:var(--ink-faint);border:1px dashed var(--ghost);border-radius:5px;padding:0 4px;flex-shrink:0}
+.g-area{position:relative;flex-shrink:0}
+.g-month{position:absolute;top:0;bottom:0;border-left:1px solid var(--line)}
+.g-month span{position:absolute;left:6px;top:4px;font-size:11.5px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+.g-week{position:absolute;bottom:4px;font-size:10px;color:var(--ink-faint);transform:translateX(-50%)}
+.g-gridline{position:absolute;top:0;bottom:0;width:1px;background:var(--line);opacity:.55;pointer-events:none}
+.g-today{position:absolute;top:0;bottom:0;width:2px;background:var(--clay);z-index:2;pointer-events:none}
+.g-today-lbl{position:absolute;top:24px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#fff;background:var(--clay);border-radius:999px;padding:0 7px;white-space:nowrap;z-index:6}
+.bar-base{position:absolute;top:6px;height:5px;border-radius:3px;background:var(--ghost)}
+.bar-cur{position:absolute;top:14px;height:14px;border-radius:4px;cursor:default}
+.bar-cur.done{background:var(--ok)}
+.bar-cur.doing{background:var(--clay)}
+.bar-cur.todo{background:var(--forest-2);opacity:.45}
+.bar-cur.unk{background:repeating-linear-gradient(135deg,var(--ghost) 0 4px,transparent 4px 8px);border:1px solid var(--ghost)}
+.bar-cur .fill{position:absolute;inset:0 auto 0 0;background:rgba(255,255,255,.28);border-radius:4px 0 0 4px}
+.ms{position:absolute;top:11px;width:14px;height:14px;transform:rotate(45deg);background:var(--clay);border-radius:2px}
+.bar-tag{position:absolute;top:12px;font-size:11.5px;font-weight:700;white-space:nowrap;padding-left:6px}
+.bar-tag.late{color:var(--err)}
+.bar-tag.unk{color:var(--ink-faint);font-weight:500}
+.bar-tag.tbd{color:var(--ink-faint);font-weight:500;padding-left:10px}
+.tip{position:fixed;z-index:100;pointer-events:none;background:var(--ink);color:var(--paper);font-size:12px;line-height:1.6;padding:9px 12px;border-radius:10px;max-width:300px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transition:opacity .12s}
+.tip.show{opacity:1}
+.tip b{font-size:13px}
+
+details.table-wrap{margin-top:16px}
+details.table-wrap summary{cursor:pointer;font-weight:600;color:var(--clay);padding:6px 0;list-style:none}
+details.table-wrap summary::-webkit-details-marker{display:none}
+details.table-wrap summary::before{content:"+ "}
+details.table-wrap[open] summary::before{content:"- "}
+.tbl-scroll{overflow-x:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px}
+th{font-size:12px;font-weight:600;color:var(--ink-soft);text-align:left;padding:10px 12px;background:var(--paper-2);white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right}
+tr.grp-row td{background:var(--forest-soft);font-weight:700;color:var(--forest-2);border-top:0}
+td .late{color:var(--err);font-weight:700}
+td .muted{color:var(--ink-faint)}
+
+/* ===== 形象进度 ===== */
+.barn-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.barn{padding:20px 22px;min-width:0}
+@media(max-width:640px){.barn{padding:16px 14px}}
+.barn-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.barn-head h3{font-size:18px;font-weight:800}
+.barn-head .st{font-size:13px;color:var(--ink-soft)}
+.barn-pct{margin-left:auto;font-size:13px;color:var(--ink-soft)}
+.barn-pct b{font-size:22px;color:var(--clay);font-weight:800;margin-right:2px}
+.matrix-scroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.matrix{display:grid;grid-template-columns:84px repeat(5,minmax(0,1fr));gap:6px;min-width:560px}
+.matrix .ch{font-size:12px;color:var(--ink-faint);text-align:center;padding-bottom:2px}
+.matrix .rh{font-size:13px;font-weight:700;display:flex;align-items:center}
+.cell{border-radius:10px;padding:9px 10px;min-height:58px;display:flex;flex-direction:column;justify-content:space-between;font-size:12px;border:1px solid transparent}
+.cell .s{font-weight:700;font-size:12.5px}
+.cell .dt{font-size:11.5px;opacity:.85}
+.cell.done{background:var(--ok-soft);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
+.cell.doing{background:var(--clay-soft);color:var(--clay-deep);border-color:var(--clay)}
+@media (prefers-color-scheme: dark){.cell.doing{color:var(--clay)}}
+.cell.todo{background:transparent;color:var(--ink-faint);border:1px dashed var(--line)}
+.cell.tbd{background:var(--paper-2);color:var(--ink-faint)}
+@media(max-width:640px){.matrix{grid-template-columns:56px repeat(5,minmax(0,1fr))}}
+.whole{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px;margin-top:10px}
+.whole .cell{min-height:64px}
+
+.aerial{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+@media(max-width:760px){.aerial{grid-template-columns:1fr}}
+.aerial .ph{grid-column:auto}
+.aerial .ph .img{aspect-ratio:16/9;border-radius:var(--radius)}
+.photo-day{margin-top:26px}
+.photo-day h4{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;gap:10px;align-items:baseline}
+.photo-day h4 small{font-size:12px;color:var(--ink-faint);font-weight:400}
+.photos{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+.ph{grid-column:span 4;cursor:zoom-in;background:none;border:0;text-align:left;color:inherit;padding:0}
+.ph.wide{grid-column:span 6}
+.ph.tall{grid-column:span 3}
+@media(max-width:900px){.ph,.ph.wide,.ph.tall{grid-column:span 6}}
+@media(max-width:560px){.ph,.ph.wide,.ph.tall{grid-column:span 12}}
+.ph .img{position:relative;overflow:hidden;border-radius:var(--radius-sm);background:var(--paper-2);aspect-ratio:4/3}
+.ph.wide .img{aspect-ratio:2/1}
+.ph.tall .img{aspect-ratio:3/4}
+.ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+@media (prefers-reduced-motion: no-preference){.ph:hover img{transform:scale(1.03)}}
+.ph .cap{font-size:13px;font-weight:600;margin-top:7px;line-height:1.5}
+.ph .cap span{display:block;font-weight:400;font-size:12px;color:var(--ink-faint)}
+.lightbox{position:fixed;inset:0;z-index:200;background:rgba(12,14,13,.92);display:none;align-items:center;justify-content:center;padding:24px}
+.lightbox.show{display:flex}
+.lightbox figure{max-width:min(1400px,100%);max-height:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
+.lightbox img{max-width:100%;max-height:calc(100dvh - 120px);object-fit:contain;border-radius:8px}
+.lightbox figcaption{color:#e8ebe6;font-size:14px;text-align:center}
+.lb-btn{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer}
+.lb-btn:hover{background:rgba(255,255,255,.24)}
+.lb-prev{left:16px;top:50%}.lb-next{right:16px;top:50%}.lb-close{right:16px;top:16px}
+
+/* ===== 节点协调 ===== */
+.nodes-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;align-items:start}
+@media(max-width:900px){.nodes-grid{grid-template-columns:1fr}}
+.timeline{padding:12px 22px 16px}
+.node{display:grid;grid-template-columns:78px 20px 1fr;gap:0 12px;position:relative;padding:12px 0}
+.node .when{text-align:right;font-weight:800;font-size:16px;line-height:1.3}
+.node .when small{display:block;font-size:11.5px;font-weight:500;color:var(--ink-faint)}
+.node .rail{position:relative;display:flex;justify-content:center}
+.node .rail::before{content:"";position:absolute;top:0;bottom:-24px;width:2px;background:var(--line)}
+.node:last-child .rail::before{bottom:auto;height:14px}
+.node .pin{position:relative;margin-top:4px;width:14px;height:14px;border-radius:50%;background:var(--card);border:3px solid var(--forest-2)}
+.node.past .pin{background:var(--ok);border-color:var(--ok)}
+.node.next .pin{border-color:var(--clay);background:var(--clay)}
+.node.past .what{color:var(--ink-faint)}
+.node .what b{display:block;font-size:14.5px}
+.node .what span{font-size:12.5px;color:var(--ink-soft)}
+.node.past .what span{color:var(--ink-faint)}
+.cd{display:inline-block;margin-top:4px;font-size:12px;font-weight:700;border-radius:999px;padding:0 9px}
+.cd.soon{background:var(--clay-soft);color:var(--clay-deep)}
+@media (prefers-color-scheme: dark){.cd.soon{color:var(--clay)}}
+.cd.later{background:var(--paper-2);color:var(--ink-soft)}
+.cd.done{background:var(--ok-soft);color:var(--ok)}
+.side-card{padding:18px 20px}
+.side-card+.side-card{margin-top:16px}
+.side-card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.side-card ol,.side-card ul{padding-left:18px;color:var(--ink-soft);font-size:13.5px}
+.side-card li{margin:5px 0}
+.side-card li b{color:var(--ink)}
+.side-card p{font-size:13px;color:var(--ink-soft)}
+.meet{border-top:1px solid var(--line);padding:10px 0}
+.meet:first-of-type{border-top:0}
+.meet .mt{font-weight:700;font-size:13.5px}
+.meet .mt small{font-weight:400;color:var(--ink-faint);margin-left:6px}
+.basis-list{display:grid;gap:8px;margin-top:6px}
+.basis-list div{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:baseline;font-size:13px;color:var(--ink-soft)}
+
+footer.foot{border-top:1px solid var(--line);padding-block:22px;color:var(--ink-faint);font-size:12px}
+</style>
+</head>
+<body>
+
+<!-- ===== 智猪侠导航 ===== -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/"><span class="mark"><img src="/public/images/logo.jpg" alt="智猪侠"></span> 智猪侠</a>
+    <nav class="nav-links">
+      <a href="/">首页</a>
+      <a href="/">收录场地</a>
+      <a href="/">案例</a>
+      <a href="/">文章</a>
+      <a href="/public/grow-kanban.html">养殖看板</a>
+      <a class="active" href="/public/taojiang-project.html">桃江项目</a>
+      <a class="nav-cta" href="/">提交场地</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== 栏目内标签 ===== -->
+<div class="kanban-tabs">
+  <div class="wrap">
+    <button class="tab-btn active" data-page="today">今日进度</button>
+    <button class="tab-btn" data-page="plan">计划对比</button>
+    <button class="tab-btn" data-page="photos">形象进度</button>
+    <button class="tab-btn" data-page="nodes">节点与协调</button>
+    <span class="tabs-meta">牛田镇大冲里 GROW 农场 2 栋 · 数据截至 9月11日 第九次例会</span>
+  </div>
+</div>
+
+<!-- ====== 今日进度 ====== -->
+<section class="page active" id="page-today">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>今日<em>施工进度</em></h2>
+      <p>按第九次例会更新后的计划推算每道工序今天应完成到什么程度。竖线标记为原计划同日应到的位置，右上角为完工日相对原计划延后的天数。</p>
+    </div>
+
+    <div class="datebar">
+      <div class="ctrl">
+        <button class="step" data-step="-1" aria-label="前一天">&lsaquo;</button>
+        <input type="date" id="dateInput" min="2026-06-01" max="2027-04-30" aria-label="选择日期">
+        <button class="step" data-step="1" aria-label="后一天">&rsaquo;</button>
+      </div>
+      <button class="btn-today" id="btnToday">回到今天</button>
+      <span class="hint" id="dateHint"></span>
+    </div>
+
+    <div class="today-lead">
+      <div class="panel lead-card">
+        <div class="lead-date" id="leadDate"></div>
+        <div class="lead-title" id="leadTitle"></div>
+        <div class="lead-body" id="leadBody"></div>
+        <div class="pace" id="pace"></div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+    </div>
+
+    <div class="today-grid">
+      <div class="panel list-card">
+        <h3>今日在施工序 <small id="doingCount"></small></h3>
+        <div id="doingList"></div>
+      </div>
+      <div>
+        <div class="panel list-card">
+          <h3>落后原计划 <small>按延后天数排序</small></h3>
+          <div id="behindList"></div>
+        </div>
+        <div class="panel list-card" style="margin-top:16px">
+          <h3>未来 7 天开工</h3>
+          <div id="upcomingList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 计划对比 ====== -->
+<section class="page" id="page-plan">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>原计划 vs <em>当前计划</em></h2>
+      <p>原计划取自 8 月版《施工计划表》；当前计划按第九次例会纪要和现场照片更新，未涉及的工序按工序衔接顺延或暂按原计划，依据逐项标注。</p>
+    </div>
+
+    <div class="sub-head">关键节点延后<small>空心点为原计划完工日，实心点为当前计划完工日</small></div>
+    <div class="panel slip"><div class="slip-inner" id="slip"></div>
+      <div class="legend">
+        <span><i class="lg-base"></i>原计划完工</span>
+        <span><i class="lg-cur"></i>当前计划完工</span>
+        <span><i class="lg-today"></i>所选日期</span>
+      </div>
+    </div>
+
+    <div class="sub-head">总进度甘特图<small id="ganttCount"></small></div>
+    <div class="toolbar" id="toolbar">
+      <button class="chip on" data-f="all">全部</button>
+      <button class="chip" data-f="late">仅延后</button>
+      <button class="chip" data-f="h1">猪舍1</button>
+      <button class="chip" data-f="h2">猪舍2</button>
+      <button class="chip" data-f="aux">配套工程</button>
+      <span class="sep"></span>
+      <button class="chip on" data-r="near">近期（7月至12月）</button>
+      <button class="chip" data-r="full">全周期</button>
+    </div>
+    <div class="panel gantt" id="gantt"></div>
+    <div class="legend">
+      <span><i class="lg-bar-base"></i>原计划</span>
+      <span><i class="lg-bar-done"></i>已完成</span>
+      <span><i class="lg-bar-doing"></i>进行中</span>
+      <span><i class="lg-bar-todo"></i>未开始</span>
+      <span><i class="lg-today"></i>所选日期</span>
+      <span>斜纹 = 完成情况待确认</span>
+    </div>
+
+    <details class="table-wrap">
+      <summary id="tblSummary">查看逐项明细表</summary>
+      <div class="panel tbl-scroll">
+        <table>
+          <thead><tr><th>工序</th><th>原计划</th><th>当前计划</th><th class="num">延后</th><th>依据</th><th>说明</th></tr></thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ====== 形象进度 ====== -->
+<section class="page" id="page-photos">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>形象<em>进度</em></h2>
+      <p>顶部为 9月11日航拍全景，中间按分段和工序标示两栋猪舍实际状态，下方为现场照片，点击均可放大查看。</p>
+    </div>
+    <div class="aerial" id="aerial"></div>
+    <div class="barn-grid" id="barns"></div>
+    <div id="photoFeed"></div>
+  </div>
+</section>
+
+<!-- ====== 节点与协调 ====== -->
+<section class="page" id="page-nodes">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>节点与<em>协调事项</em></h2>
+      <p>第九次例会（9月11日，牛田镇全盛矿业会议室）确定的时间节点，倒计时按所选日期计算。</p>
+    </div>
+    <div class="nodes-grid">
+      <div class="panel timeline" id="timeline"></div>
+      <div>
+        <div class="side-card panel">
+          <h3>本周完成</h3>
+          <ul><li>第二段竖壁混凝土完成</li><li>第三段底板混凝土完成</li><li>实心预制板（漏粪板）到场</li></ul>
+          <h3 style="margin-top:14px">下周计划</h3>
+          <ul><li>第三段竖壁混凝土完成</li></ul>
+        </div>
+        <div class="side-card panel">
+          <h3>管理约定</h3>
+          <ul>
+            <li>钢结构材料到场后由<b>驷牧</b>负责保管</li>
+            <li>现场成品保护：谁造成的问题，谁负责清理和费用</li>
+            <li>钢构发货须提前 3 天通知，提前备好机械、人员住宿和安装场地</li>
+          </ul>
+        </div>
+        <div class="side-card panel">
+          <h3>例会记录</h3>
+          <div class="meet"><div class="mt">第九次<small>9月11日</small></div><p>竖壁混凝土 9/18 前完成，刮粪机 9/20 进场，漏粪板 10/7 前完成，钢构 10/10 开始安装，总图 9 月底签批。</p></div>
+          <div class="meet"><div class="mt">第八次<small>8月14日</small></div><p>第一栋第一段底板钢筋完成；进度滞后，钢筋班组增加人员，集中完成粪沟混凝土，提前统筹钢构吊装交叉作业安全。</p></div>
+        </div>
+        <div class="side-card panel">
+          <h3>数据依据</h3>
+          <div class="basis-list">
+            <div><span class="basis M">纪要</span>例会纪要明确的日期或状态</div>
+            <div><span class="basis P">照片</span>现场照片水印的日期和施工内容</div>
+            <div><span class="basis D">顺延</span>按工序衔接和原工期推算，待现场确认</div>
+            <div><span class="basis O">原计划</span>纪要未涉及，暂按原计划</div>
+            <div><span class="basis U">待确认</span>原计划已到期但无进展信息</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot"><div class="wrap">正大集团、霖梧牛农业、驷牧集团　桃江县牛田镇大冲里 GROW 农场项目。计划数据按例会更新，以现场实际为准。</div></footer>
+
+<div class="tip" id="tip"></div>
+<div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="照片查看">
+  <button class="lb-btn lb-close" data-lb="close" aria-label="关闭">&times;</button>
+  <button class="lb-btn lb-prev" data-lb="prev" aria-label="上一张">&lsaquo;</button>
+  <figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure>
+  <button class="lb-btn lb-next" data-lb="next" aria-label="下一张">&rsaquo;</button>
+</div>
+
+<script>
+/* =====================================================================
+   数据区：以后每次例会只需要改这里
+   日期写 "MM-DD" 默认 2026 年，跨年写 "2027-MM-DD"
+   cur: null = 与原计划相同；数字 = 整体顺延天数；["MM-DD","MM-DD"] = 指定起止
+   basis: M 纪要 / P 照片 / D 顺延推算 / O 暂按原计划 / U 待确认 / T 待定
+   ===================================================================== */
+const DATA_DATE = "2026-09-11";
+const PROJECT_START = "2026-06-01", PROJECT_END = "2027-04-30";
+
+const PLAN = [
+  { g:"前期工作", key:"aux", rows:[
+    ["临时建筑搭设","07-24","07-31",null,"P","钢筋加工棚已投入使用（9/8 照片）"],
+  ]},
+  { g:"猪舍1", key:"h1", rows:[
+    ["猪舍整体开挖","06-04","06-15",null,"P","已完成，粪沟底板已施工"],
+    ["猪舍垫层","06-16","06-16",null,"P","已完成"],
+    ["第一段粪沟钢筋绑扎","07-29","08-05",["07-29","08-14"],"M","第八次纪要：8/14 第一段底板钢筋完成"],
+    ["第一段钢构预埋","08-02","08-07",["08-27","09-01"],"D","第一段竖壁 9/2 浇筑前完成"],
+    ["第一段粪沟墙体模版","08-01","08-07",["08-26","09-01"],"D","第一段竖壁 9/2 浇筑前完成"],
+    ["第一段混凝土浇筑","08-08","08-08",["08-16","09-02"],"P","底板 8/16、竖壁 9/2 浇筑"],
+    ["第二段粪沟钢筋绑扎","08-06","08-13",["08-16","09-07"],"P","底板钢筋 8/16、竖壁钢筋 9/7"],
+    ["第二段粪沟钢构预埋","08-10","08-13",["09-07","09-10"],"D","9/10 预埋件安装（照片）"],
+    ["第二段粪沟模版","08-10","08-15",["09-05","09-09"],"P","9/5 至 9/8 竖壁装模"],
+    ["第二段粪沟混凝土","08-16","08-16",["09-02","09-10"],"M","底板 9/2；竖壁本周完成（第九次纪要）"],
+    ["排污管道开挖预埋","08-05","08-12",null,"U","8/16 集粪坑及排污管开挖（照片），完成日期待确认"],
+    ["集粪坑砖胎膜施工","08-13","08-20",["09-09","09-18"],"D","9/9 至 9/10 集粪坑装模中；按 9/18 刮粪机安装条件推算"],
+    ["第三段粪沟钢筋","08-20","08-27",["09-05","09-13"],"P","底板钢筋 9/5、竖壁钢筋 9/10 施工中"],
+    ["第三段粪沟钢构预埋","08-27","08-29",["09-12","09-15"],"D","竖壁浇筑前完成"],
+    ["第三段粪沟模版","08-24","08-29",["09-12","09-16"],"D","竖壁浇筑前完成"],
+    ["第三段粪沟混凝土","08-30","08-30",["09-11","09-18"],"M","底板本周完成；竖壁 9/18 前完成并拆模清理"],
+    ["粪沟养护","08-08","09-15",["08-16","09-19"],"D","养护至刮粪机进场前"],
+    ["刮粪板安装","09-06","09-12",["09-20","09-25"],"M","9/20 刮粪机进场，9/25 安装完成"],
+    ["漏粪板","09-10","09-16",["10-01","10-07"],"M","10/1 开始盖，10/5 盖完，10/7 前完成；实心预制板已到场"],
+    ["钢构立柱","09-18","09-25",["10-10","10-17"],"M","10/10 开始钢构安装，工期沿用原计划"],
+    ["钢构主次结构拼装","09-26","10-10",22,"D","随钢构立柱顺延"],
+    ["屋顶施工","10-11","10-16",22,"D","随钢构顺延"],
+    ["钢构墙体","10-17","10-25",22,"D","随钢构顺延"],
+    ["吊顶施工","10-26","11-01",22,"D","随钢构顺延"],
+    ["设备安装","11-04","12-03",22,"D","吊顶完成后 3 天进场"],
+    ["水电施工","12-01","12-07",22,"D","设备安装收尾前 2 天开始"],
+    ["运行调试","12-20","12-21",["12-30","12-31"],"D","需水电完成、主水主电到位"],
+  ]},
+  { g:"猪舍2", key:"h2", rows:[
+    ["猪舍整体开挖","06-04","06-15",null,"P","已完成"],
+    ["猪舍垫层","06-16","06-16",null,"P","已完成"],
+    ["粪沟墙体第一段钢筋绑扎","09-01","09-08",19,"D","9/10 起钢筋加工棚制作猪舍2钢筋（照片）；现场绑扎按猪舍1第三段完成后接续推算"],
+    ["第一段粪沟墙体模版","09-09","09-16",19,"D","随猪舍1粪沟顺延"],
+    ["第一段混凝土浇筑","09-17","09-17",19,"D","随猪舍1粪沟顺延"],
+    ["第二段粪沟钢筋","09-18","09-25",19,"D","随猪舍1粪沟顺延"],
+    ["第二段粪沟模版","09-26","10-03",19,"D","随猪舍1粪沟顺延"],
+    ["第三段粪沟钢筋","10-04","10-11",19,"D","随猪舍1粪沟顺延"],
+    ["第三段粪沟模版","10-12","10-17",19,"D","随猪舍1粪沟顺延"],
+    ["第三段粪沟混凝土","10-18","10-18",19,"D","随猪舍1粪沟顺延"],
+    ["钢构预埋件","09-01","10-11",19,"D","随猪舍1粪沟顺延"],
+    ["粪沟养护","09-17","10-31",19,"D","随猪舍1粪沟顺延"],
+    ["漏粪板",null,null,null,"T","原计划待定"],
+    ["钢构立柱",null,null,null,"T","原计划待定"],
+    ["钢构主梁",null,null,null,"T","原计划待定"],
+    ["屋顶施工",null,null,null,"T","原计划待定"],
+    ["钢构墙体",null,null,null,"T","原计划待定"],
+    ["吊顶施工",null,null,null,"T","原计划待定"],
+    ["水电施工",null,null,null,"T","原计划待定"],
+    ["设备安装",null,null,null,"T","原计划待定"],
+    ["运行调试",null,null,null,"T","原计划待定"],
+  ]},
+  { g:"洗消房", key:"aux", rows:[
+    ["基础开挖","10-19","10-20",null,"O","纪要未涉及；受 9 月底总图签批影响"],
+    ["主体施工","10-20","10-31",null,"O","纪要未涉及"],
+    ["装饰装修","11-01","11-30",null,"O","纪要未涉及"],
+  ]},
+  { g:"人员宿舍", key:"aux", rows:[
+    ["基础开挖","11-01","11-02",null,"O","纪要未涉及；受总图签批影响"],
+    ["主体施工","11-02","11-25",null,"O","纪要未涉及"],
+    ["装饰装修","11-25","12-10",null,"O","纪要未涉及"],
+  ]},
+  { g:"室外工程", key:"aux", rows:[
+    ["场区雨水沟","09-18","2027-01-25",null,"O","原计划 9/18 开工，需总图签批后确定"],
+    ["主水主电","10-25","12-20",null,"O","纪要未涉及"],
+    ["不锈钢蓄水池","11-05","12-05",null,"O","纪要未涉及"],
+    ["低压配电柜系统","11-10","11-25",null,"O","纪要未涉及"],
+    ["变频供水系统","11-25","12-15",null,"O","纪要未涉及"],
+    ["发电机系统","11-25","12-20",null,"O","纪要未涉及"],
+    ["料塔基础","12-01","12-05",null,"O","纪要未涉及"],
+    ["赶猪道","12-05","2027-01-10",null,"O","纪要未涉及"],
+    ["人员隔离点","12-05","2027-01-25",null,"O","纪要未涉及"],
+    ["车辆自动喷淋系统","12-05","2027-01-25",null,"O","纪要未涉及"],
+    ["场区预制围墙","12-25","2027-01-25",null,"O","纪要未涉及"],
+  ]},
+  { g:"环保", key:"aux", rows:[
+    ["土建施工","09-10","10-25",null,"U","原计划 9/10 开工，纪要和照片均未见开工信息"],
+    ["设备安装","10-25","11-25",null,"O","纪要未涉及"],
+    ["调试运行","11-18","2027-03-18",null,"O","纪要未涉及"],
+  ]},
+  { g:"收尾投产", key:"aux", rows:[
+    ["物资购买","2027-02-13","2027-03-13",null,"O","暂按原计划"],
+    ["整场调试运行","2027-02-13","2027-03-13",null,"O","暂按原计划"],
+    ["竣工验收","2027-03-14","2027-03-16",null,"O","暂按原计划"],
+    ["洗消","2027-03-14","2027-04-14",null,"O","暂按原计划"],
+    ["投产进猪","2027-04-18","2027-04-18",null,"O","总里程碑，暂未调整","ms"],
+  ]},
+];
+
+// 第九次例会节点
+const NODES = [
+  ["08-14","第八次例会","第一段底板钢筋完成，要求钢筋班组加人"],
+  ["09-11","第九次例会","第二段竖壁、第三段底板混凝土完成，实心预制板到场"],
+  ["09-18","竖壁混凝土完成、拆模清理","为刮粪机提供安装条件"],
+  ["09-20","刮粪机进场","提前准备发货和安装人员"],
+  ["09-25","刮粪机安装完成",""],
+  ["09-30","总图布局确定并签批","霖梧牛、驷牧、正大三方"],
+  ["10-01","开始盖漏粪板","提前准备发货、吊车和安装人员"],
+  ["10-05","漏粪板盖完",""],
+  ["10-07","漏粪板安装完成；钢构发货通知","钢构发货须提前 3 天通知"],
+  ["10-10","钢构开始安装","提前备好机械、人员住宿和安装场地"],
+  ["2027-04-18","投产进猪","总里程碑"],
+];
+
+// 形象进度（截至 DATA_DATE 的实际状态）
+const BARNS = [
+  { name:"猪舍1", status:"粪沟第三段施工中", cols:["底板钢筋","底板混凝土","竖壁钢筋","竖壁模板","竖壁混凝土"],
+    segs:[
+      ["第一段",[["done","8/14"],["done","8/16"],["done","9/1 前"],["done","9/1 前"],["done","9/2"]]],
+      ["第二段",[["done","8/16"],["done","9/2"],["done","9/7"],["done","9/8"],["done","本周"]]],
+      ["第三段",[["done","9/5"],["done","本周"],["doing","9/10 起"],["todo","计划 9/16"],["todo","计划 9/18"]]],
+    ],
+    whole:[["集粪坑","doing","9/9 装模中"],["刮粪机检修井","doing","9/9 砌筑"],["刮粪机安装","todo","9/20 至 9/25"],["漏粪板","todo","预制板已到场，10/1 至 10/7"],["钢结构安装","todo","10/10 起"]]
+  },
+  { name:"猪舍2", status:"钢筋加工中，粪沟未开始", cols:["底板钢筋","底板混凝土","竖壁钢筋","竖壁模板","竖壁混凝土"],
+    segs:[
+      ["第一段",[["todo","推算 9/20 起"],["todo",""],["todo",""],["todo",""],["todo","推算 10/6"]]],
+      ["第二段",[["todo",""],["todo",""],["todo",""],["todo",""],["todo",""]]],
+      ["第三段",[["todo",""],["todo",""],["todo",""],["todo",""],["todo","推算 11/6"]]],
+    ],
+    whole:[["开挖及垫层","done","6/16 前"],["钢筋加工","doing","9/10 起"],["钢构预埋件","todo","推算 9/20 起"],["漏粪板及钢构","tbd","待定"]]
+  },
+];
+
+const PHOTOS = [
+  // 第 5 列写 "aerial" 的放在形象进度页顶部的航拍全景区
+  ["tj-20260911-aerial-all","09-11","全场航拍：生产区、进场道路与周边山林","","aerial"],
+  ["tj-20260911-aerial-prod","09-11","生产区航拍：两栋猪舍粪沟及场地","","aerial"],
+  ["tj-20260911-35","09-11","第三段底板混凝土浇筑","wide"],
+  ["tj-20260911-38","09-11","粪沟竖壁拆模，检修井已砌筑","wide"],
+  ["tj-20260911-42","09-11","粪沟竖壁成型","wide"],
+  ["tj-20260911-39","09-11","实心预制板（漏粪板）到场","wide"],
+  ["tj-20260910-27","09-10","猪舍2 钢筋制作（钢筋加工区）",""],
+  ["tj-20260909-22","09-09","集粪坑装模",""],
+  ["tj-20260909-21","09-09","刮粪机检修井砌筑",""],
+  ["tj-20260907-14","09-07","第二段竖壁装模",""],
+  ["tj-20260905-09","09-05","第三段底板钢筋绑扎",""],
+  ["tj-20260902-07","09-02","第一段粪沟风道竖壁混凝土浇筑",""],
+  ["tj-20260902-03","09-02","第二段底板混凝土浇筑",""],
+  ["tj-20260816-00","08-16","底板混凝土浇筑",""],
+  ["tj-20260816-02","08-16","第二段底板钢筋绑扎",""],
+  ["tj-20260816-01","08-16","集粪坑及排污管开挖","tall"],
+];
+const IMG_DIR = "/public/images/taojiang/";
+
+/* ===================================================================== */
+const DAY = 86400000;
+const d2n = s => { if (s.length === 5) s = "2026-" + s; return Math.round(Date.UTC(+s.slice(0,4), +s.slice(5,7)-1, +s.slice(8,10)) / DAY); };
+const n2iso = n => new Date(n*DAY).toISOString().slice(0,10);
+const md = n => { const d = new Date(n*DAY); return (d.getUTCMonth()+1) + "/" + d.getUTCDate(); };
+const mdFull = n => { const d = new Date(n*DAY); return (d.getUTCFullYear()!==2026 ? d.getUTCFullYear()+"年" : "") + (d.getUTCMonth()+1) + "月" + d.getUTCDate() + "日"; };
+const WEEK = ["日","一","二","三","四","五","六"];
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const BASIS = {M:"纪要",P:"照片",D:"顺延",O:"原计划",U:"待确认",T:"待定"};
+
+const DATA_N = d2n(DATA_DATE), P0 = d2n(PROJECT_START), P1 = d2n(PROJECT_END);
+
+// 展开任务
+const TASKS = [];
+PLAN.forEach(grp => grp.rows.forEach((r, i) => {
+  const [name, ps, pe, cur, basis, note, type] = r;
+  const t = { g: grp.g, key: grp.key, name, basis, note, ms: type === "ms", tbd: basis === "T", idx: TASKS.length };
+  if (!t.tbd) {
+    t.ps = d2n(ps); t.pe = d2n(pe);
+    if (cur == null) { t.cs = t.ps; t.ce = t.pe; }
+    else if (typeof cur === "number") { t.cs = t.ps + cur; t.ce = t.pe + cur; }
+    else { t.cs = d2n(cur[0]); t.ce = d2n(cur[1]); }
+    t.delay = basis === "U" ? null : t.ce - t.pe;
+  }
+  TASKS.push(t);
+}));
+const REAL = TASKS.filter(t => !t.tbd);
+// 关键线路：猪舍1 粪沟混凝土到运行调试的主线工序
+const CRIT = ["第一段混凝土浇筑","第二段粪沟混凝土","第三段粪沟混凝土","刮粪板安装","漏粪板","钢构立柱","钢构主次结构拼装","屋顶施工","钢构墙体","吊顶施工","设备安装","水电施工","运行调试"];
+TASKS.forEach(t => t.crit = t.key === "h1" && CRIT.includes(t.name));
+
+const pct = (s, e, D) => clamp((D - s + 1) / (e - s + 1), 0, 1);
+const stat = (t, D) => t.tbd ? "tbd" : t.ce < D ? "done" : t.cs <= D ? "doing" : "todo";
+const delayHtml = t => t.tbd ? '<span class="delay unk">待定</span>'
+  : t.delay == null ? '<span class="delay unk">待确认</span>'
+  : t.delay > 0 ? `<span class="delay late">延后 ${t.delay} 天</span>`
+  : t.delay < 0 ? `<span class="delay ontime">提前 ${-t.delay} 天</span>`
+  : '<span class="delay ontime">按期</span>';
+
+/* ---------- 状态 ---------- */
+const shanghaiToday = () => d2n(new Date(Date.now() + 8*3600*1000).toISOString().slice(0,10));
+const TODAY = clamp(shanghaiToday(), P0, P1);
+let D = TODAY;
+let filter = "all", range = "near";
+try { const q = new URLSearchParams(location.search).get("d"); if (q && /^\d{4}-\d{2}-\d{2}$/.test(q)) D = clamp(d2n(q), P0, P1); } catch(e) {}
+
+/* ---------- 今日进度 ---------- */
+function renderToday() {
+  $("dateInput").value = n2iso(D);
+  $("btnToday").hidden = D === TODAY;
+  const wd = WEEK[new Date(D*DAY).getUTCDay()];
+  const future = D > DATA_N;
+  $("dateHint").innerHTML = future
+    ? `<span class="future-note">所选日期晚于最近例会（9月11日），以下为按当前计划的推算</span>`
+    : D === DATA_N ? "第九次例会当日" : "";
+
+  const doing = REAL.filter(t => stat(t, D) === "doing" && !t.ms).sort((a,b) => (b.crit - a.crit) || (b.delay||0) - (a.delay||0) || a.ce - b.ce);
+  const baseDone = REAL.filter(t => t.pe < D).length;
+  const curDone = REAL.filter(t => t.ce < D).length;
+
+  // 工期加权进度
+  let wb = 0, wc = 0, wt = 0;
+  REAL.forEach(t => { if (t.ms) return; const dur = t.pe - t.ps + 1; wt += dur; wb += dur * pct(t.ps, t.pe, D); wc += dur * pct(t.cs, t.ce, D); });
+  const pb = Math.round(wb / wt * 100), pc = Math.round(wc / wt * 100);
+
+  // 关键线路（猪舍1 未完工序最大延后）
+  const h1Remain = REAL.filter(t => t.crit && t.ce >= D && t.delay != null);
+  const crit = h1Remain.length ? h1Remain.reduce((a,b) => b.delay > a.delay ? b : a) : null;
+
+  // 下一个节点
+  const next = NODES.map(n => ({ n: d2n(n[0]), t: n[1], s: n[2] })).find(x => x.n > D);
+  const prod = d2n("2027-04-18");
+
+  // 标题
+  const main = doing[0];
+  $("leadDate").textContent = `${mdFull(D)} 星期${wd}`;
+  if (main) {
+    const p = Math.round(pct(main.cs, main.ce, D) * 100);
+    $("leadTitle").innerHTML = `${esc(main.g)}${esc(main.name)}应完成 <em>${p}%</em>`;
+    const others = doing.length - 1;
+    $("leadBody").textContent = `当前计划 ${md(main.cs)} 至 ${md(main.ce)}，原计划 ${md(main.pe)} 完工。` + (others > 0 ? `今天另有 ${others} 道工序在施。` : "");
+  } else {
+    $("leadTitle").innerHTML = D > REAL.reduce((m,t)=>Math.max(m,t.ce),0) ? "全部工序已按计划完成" : "今天没有在施工序";
+    $("leadBody").textContent = next ? `下一个节点：${md(next.n)} ${next.t}` : "";
+  }
+  $("pace").innerHTML = `
+    <div class="pace-row"><span>原计划进度</span><div class="pace-bar"><i style="width:${pb}%;background:var(--ghost)"></i></div><b class="num">${pb}%</b></div>
+    <div class="pace-row"><span>当前计划进度</span><div class="pace-bar"><i style="width:${pc}%;background:var(--clay)"></i></div><b class="num">${pc}%</b></div>
+    <div class="pace-row" style="grid-template-columns:1fr"><span style="font-size:11.5px;color:var(--ink-faint)">按各工序原工期加权计算，差值 ${pb - pc} 个百分点，反映计划进度偏差。</span></div>`;
+
+  const nextCd = next ? next.n - D : null;
+  $("kpis").innerHTML = `
+    <div class="kpi"><div class="kpi-lbl">关键线路延后</div>
+      <div class="kpi-val ${crit && crit.delay > 0 ? "red" : "ok"} num">${crit ? crit.delay : 0}<small>天</small></div>
+      <div class="kpi-note">${crit ? `猪舍1 ${esc(crit.name)}：${md(crit.pe)} 延至 ${md(crit.ce)}` : "猪舍1 主线工序已完成"}</div></div>
+    <div class="kpi"><div class="kpi-lbl">下一个节点</div>
+      <div class="kpi-val clay num">${next ? md(next.n) : "无"}${next ? `<small>还有 ${nextCd} 天</small>` : ""}</div>
+      <div class="kpi-note">${next ? esc(next.t) : ""}</div></div>
+    <div class="kpi"><div class="kpi-lbl">应完工工序</div>
+      <div class="kpi-val num">${curDone}<small>/ ${REAL.length} 项</small></div>
+      <div class="kpi-note">原计划此时应完工 ${baseDone} 项，差 ${baseDone - curDone} 项</div></div>
+    <div class="kpi"><div class="kpi-lbl">距投产进猪</div>
+      <div class="kpi-val num">${Math.max(0, prod - D)}<small>天</small></div>
+      <div class="kpi-note">2027年4月18日，总里程碑暂未调整</div></div>`;
+
+  // 今日在施
+  $("doingCount").textContent = doing.length ? `${doing.length} 项` : "";
+  $("doingList").innerHTML = doing.length ? doing.map(t => {
+    const pc = pct(t.cs, t.ce, D), pb = pct(t.ps, t.pe, D);
+    const baseTxt = t.pe < D ? `原计划 ${md(t.pe)} 已应完工` : t.ps > D ? `原计划 ${md(t.ps)} 才开工` : `原计划此时应到 ${Math.round(pb*100)}%`;
+    return `<div class="task">
+      <div class="task-top"><span class="grp">${esc(t.g)}</span><span class="task-name">${esc(t.name)}</span>${delayHtml(t)}</div>
+      <div class="prog"><div class="prog-track" title="竖线为原计划同日应到位置">
+        <div class="prog-fill" style="width:${pc*100}%${t.basis === "U" ? ";background:var(--ghost)" : ""}"></div>
+        <div class="prog-base" style="left:calc(${pb*100}% - 1px)"></div></div>
+        <div class="prog-pct num">${Math.round(pc*100)}%</div></div>
+      <div class="task-meta"><span>当前计划 <b>${md(t.cs)} 至 ${md(t.ce)}</b></span><span>${baseTxt}</span><span class="basis ${t.basis}">${BASIS[t.basis]}</span></div>
+    </div>`;
+  }).join("") : `<div class="empty">所选日期没有在施工序。</div>`;
+
+  // 落后原计划：原计划已应完工、当前未完工
+  const behind = REAL.filter(t => !t.ms && t.pe < D && t.ce >= D && (t.delay == null || t.delay > 0))
+    .sort((a,b) => (b.delay ?? -1) - (a.delay ?? -1)).slice(0, 8);
+  $("behindList").innerHTML = behind.length ? behind.map(t => `<div class="mini">
+      <div class="n">${esc(t.g)} ${esc(t.name)}</div>
+      <div class="d">原计划 ${md(t.pe)} 完工，现 ${t.delay == null ? "待确认" : md(t.ce)}</div>
+      <div class="r ${t.delay ? "late" : ""}">${t.delay == null ? "待确认" : "+" + t.delay + " 天"}</div></div>`).join("")
+    : `<div class="empty">没有落后于原计划的工序。</div>`;
+
+  const up = REAL.filter(t => t.cs > D && t.cs <= D + 7).sort((a,b) => a.cs - b.cs);
+  $("upcomingList").innerHTML = up.length ? up.map(t => `<div class="mini">
+      <div class="n">${esc(t.g)} ${esc(t.name)}</div>
+      <div class="d">${md(t.cs)} 开工，${md(t.ce)} 完工</div>
+      <div class="r">${t.cs - D} 天后</div></div>`).join("")
+    : `<div class="empty">未来 7 天没有新开工序。</div>`;
+}
+
+/* ---------- 关键节点延后（哑铃图） ---------- */
+const SLIP_KEYS = [
+  ["猪舍1","第二段粪沟混凝土"],["猪舍1","第三段粪沟混凝土"],["猪舍1","刮粪板安装"],["猪舍1","漏粪板"],
+  ["猪舍1","钢构立柱"],["猪舍1","屋顶施工"],["猪舍1","设备安装"],["猪舍1","运行调试"],
+  ["猪舍2","第一段混凝土浇筑"],["猪舍2","第三段粪沟混凝土"],["收尾投产","投产进猪"],
+];
+function renderSlip() {
+  const items = SLIP_KEYS.map(([g,n]) => TASKS.find(t => t.g === g && t.name === n)).filter(Boolean);
+  const nearItems = items.filter(t => !t.ms);
+  const a = d2n("08-01"), b = d2n("2027-01-05");
+  const x = n => ((clamp(n, a, b) - a) / (b - a) * 100).toFixed(2) + "%";
+  const months = []; for (let m = 8; m <= 13; m++) { const iso = m <= 12 ? `2026-${String(m).padStart(2,"0")}-01` : "2027-01-01"; months.push(d2n(iso)); }
+  let h = `<div class="slip-axis"><div></div><div class="slip-scale">${months.map(n => `<span style="left:${x(n)}">${new Date(n*DAY).getUTCMonth()+1}月</span>`).join("")}</div><div></div></div>`;
+  items.forEach(t => {
+    const off = t.ms;
+    const grid = months.map(n => `<div class="slip-grid" style="left:${x(n)}"></div>`).join("");
+    const today = D >= a && D <= b ? `<div class="slip-today" style="left:${x(D)}"></div>` : "";
+    if (off) {
+      h += `<div class="slip-row"><div class="lbl"><small>${t.g}</small>${t.name}</div><div class="slip-track">${grid}${today}<span style="position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:12px;color:var(--ink-faint)">2027年4月18日（图外）</span></div><div class="val zero">未调整</div></div>`;
+      return;
+    }
+    const l = Math.min(t.pe, t.ce), r = Math.max(t.pe, t.ce);
+    h += `<div class="slip-row" data-i="${t.idx}"><div class="lbl" title="${esc(t.g + " " + t.name)}"><small>${t.g}</small>${t.name}</div>
+      <div class="slip-track">${grid}${today}
+        <div class="slip-line" style="left:${x(l)};width:calc(${x(r)} - ${x(l)})"></div>
+        <div class="slip-dot base" style="left:${x(t.pe)}" title="原计划 ${md(t.pe)}"></div>
+        <div class="slip-dot cur ${t.delay === 0 ? "same" : ""}" style="left:${x(t.ce)}" title="当前计划 ${md(t.ce)}"></div>
+      </div>
+      <div class="val ${t.delay ? "" : "zero"} num">${t.delay ? "+" + t.delay + " 天" : "按期"}</div></div>`;
+  });
+  $("slip").innerHTML = h;
+}
+
+/* ---------- 甘特图 ---------- */
+function renderGantt() {
+  const near = range === "near";
+  const a = near ? d2n("07-01") : P0, b = near ? d2n("12-31") : P1;
+  const ppd = near ? 7 : 3.6;
+  const W = Math.round((b - a + 1) * ppd);
+  const x = n => (n - a) * ppd;
+
+  let groups = PLAN.map(p => p.g);
+  const match = t => filter === "all" ? true
+    : filter === "late" ? (t.delay > 0 || t.delay === null && !t.tbd)
+    : t.key === filter;
+  const tip = t => t.tbd ? `${t.g} ${t.name}：待定`
+    : `${t.g} ${t.name}|原计划 ${md(t.ps)} 至 ${md(t.pe)}|当前 ${md(t.cs)} 至 ${md(t.ce)}|${t.delay == null ? "完成情况待确认" : t.delay > 0 ? "延后 " + t.delay + " 天" : "按期"}|依据：${BASIS[t.basis]}，${t.note}`;
+
+  // 表头：月份 + 旬
+  let head = `<div class="g-row head"><div class="g-lbl">工序</div><div class="g-area" style="width:${W}px">`;
+  let cur = new Date(a*DAY);
+  const monthsN = [];
+  for (let y = cur.getUTCFullYear(), m = cur.getUTCMonth(); ; m++) {
+    const n = Math.round(Date.UTC(y, m, 1) / DAY); if (n > b) break; if (n >= a) monthsN.push(n);
+  }
+  monthsN.forEach(n => { const d = new Date(n*DAY); head += `<div class="g-month" style="left:${x(n)}px"><span>${d.getUTCFullYear()!==2026 ? d.getUTCFullYear()+"年" : ""}${d.getUTCMonth()+1}月</span></div>`; });
+  if (near) monthsN.forEach(n => [10,20].forEach(dd => { const k = n + dd - 1; if (k <= b) head += `<div class="g-week" style="left:${x(k)}px">${dd}</div>`; }));
+  if (D >= a && D <= b) head += `<div class="g-today-lbl" style="left:${x(D)+1}px">${md(D)}</div>`;
+  head += `</div></div>`;
+
+  let rows = "", count = 0;
+  PLAN.forEach(p => {
+    const ts = TASKS.filter(t => t.g === p.g && match(t));
+    if (!ts.length) return;
+    const late = ts.filter(t => t.delay > 0).length;
+    rows += `<div class="g-row group"><div class="g-lbl">${p.g} <small>${ts.length} 项${late ? "，" + late + " 项延后" : ""}</small></div><div class="g-area" style="width:${W}px"></div></div>`;
+    ts.forEach(t => {
+      count++;
+      let inner = "";
+      if (t.tbd) {
+        inner = `<span class="bar-tag tbd" style="left:0">原计划待定</span>`;
+      } else if (t.ms) {
+        inner = `<div class="ms" style="left:${x(t.ce)-7}px" data-tip="${esc(tip(t))}"></div><span class="bar-tag" style="left:${x(t.ce)+8}px;color:var(--clay)">投产进猪 ${md(t.ce)}</span>`;
+      } else {
+        const s = stat(t, D);
+        const cls = t.basis === "U" && s !== "todo" ? "unk" : s;
+        const fillW = s === "doing" ? pct(t.cs, t.ce, D) * 100 : 0;
+        inner = `<div class="bar-base" style="left:${x(t.ps)}px;width:${Math.max(3,(t.pe-t.ps+1)*ppd)}px"></div>
+          <div class="bar-cur ${cls}" style="left:${x(t.cs)}px;width:${Math.max(4,(t.ce-t.cs+1)*ppd)}px" data-tip="${esc(tip(t))}">${fillW ? `<div class="fill" style="width:${fillW}%"></div>` : ""}</div>`;
+        const tagX = x(Math.max(t.ce, t.pe) + 1);
+        if (t.delay > 0) inner += `<span class="bar-tag late" style="left:${tagX}px">+${t.delay}天</span>`;
+        else if (t.delay == null) inner += `<span class="bar-tag unk" style="left:${tagX}px">待确认</span>`;
+      }
+      rows += `<div class="g-row"><div class="g-lbl"><span class="t" title="${esc(t.name)}">${esc(t.name)}</span>${t.basis === "D" ? '<span class="flag">推算</span>' : ""}</div><div class="g-area" style="width:${W}px">${inner}</div></div>`;
+    });
+  });
+
+  // 背景网格与今日线（覆盖整个区域）
+  let overlay = `<div style="position:absolute;top:0;bottom:0;left:220px;width:${W}px;pointer-events:none">`;
+  monthsN.forEach(n => overlay += `<div class="g-gridline" style="left:${x(n)}px"></div>`);
+  if (D >= a && D <= b) overlay += `<div class="g-today" style="left:${x(D)}px"></div>`;
+  overlay += `</div>`;
+
+  const g = $("gantt");
+  g.innerHTML = `<div class="g-inner" style="width:${220+W}px">${head}${rows || '<div class="empty">当前筛选下没有工序。</div>'}${overlay}</div>`;
+  $("ganttCount").textContent = `${count} 项，灰色细条为原计划`;
+  // 自动滚动到所选日期附近
+  if (D >= a && D <= b) g.scrollLeft = Math.max(0, x(D) - g.clientWidth * 0.35);
+}
+
+function renderTable() {
+  let h = "";
+  PLAN.forEach(p => {
+    h += `<tr class="grp-row"><td colspan="6">${p.g}</td></tr>`;
+    TASKS.filter(t => t.g === p.g).forEach(t => {
+      const bp = t.tbd ? '<span class="muted">待定</span>' : `${md(t.ps)} 至 ${md(t.pe)}`;
+      const cp = t.tbd ? '<span class="muted">待定</span>' : t.basis === "U" ? '<span class="muted">待确认</span>' : `${md(t.cs)} 至 ${md(t.ce)}`;
+      const dl = t.tbd ? "" : t.delay == null ? '<span class="muted">待确认</span>' : t.delay > 0 ? `<span class="late">+${t.delay} 天</span>` : '<span class="muted">0</span>';
+      h += `<tr><td>${esc(t.name)}</td><td class="num" style="text-align:left">${bp}</td><td>${cp}</td><td class="num">${dl}</td><td><span class="basis ${t.basis}">${BASIS[t.basis]}</span></td><td style="color:var(--ink-soft)">${esc(t.note)}</td></tr>`;
+    });
+  });
+  $("tbl").innerHTML = h;
+  const late = REAL.filter(t => t.delay > 0).length;
+  $("tblSummary").textContent = `查看逐项明细表（共 ${TASKS.length} 项，其中 ${late} 项延后）`;
+}
+
+/* ---------- 形象进度 ---------- */
+const CELL_TXT = { done:"已完成", doing:"施工中", todo:"未开始", tbd:"待定" };
+function renderBarns() {
+  $("barns").innerHTML = BARNS.map(b => {
+    const cells = b.segs.flatMap(s => s[1]);
+    const done = cells.filter(c => c[0] === "done").length + cells.filter(c => c[0] === "doing").length * 0.5;
+    const p = Math.round(done / cells.length * 100);
+    return `<div class="panel barn">
+      <div class="barn-head"><h3>${b.name}</h3><span class="st">${b.status}</span>
+        <span class="barn-pct"><b class="num">${p}%</b>粪沟分项完成</span></div>
+      <div class="matrix-scroll"><div class="matrix">
+        <div></div>${b.cols.map(c => `<div class="ch">${c}</div>`).join("")}
+        ${b.segs.map(s => `<div class="rh">${s[0]}</div>` + s[1].map(c => `<div class="cell ${c[0]}"><span class="s">${CELL_TXT[c[0]]}</span><span class="dt">${c[1]}</span></div>`).join("")).join("")}
+      </div></div>
+      <div class="whole">${b.whole.map(w => `<div class="cell ${w[1]}"><span class="s">${w[0]}</span><span class="dt">${w[1] === "tbd" ? w[2] : CELL_TXT[w[1]] + "，" + w[2]}</span></div>`).join("")}</div>
+    </div>`;
+  }).join("");
+
+  $("aerial").innerHTML = PHOTOS.map((p, i) => ({ p, i })).filter(o => o.p[4] === "aerial").map(({p, i}) =>
+    `<button class="ph" data-ph="${i}"><div class="img"><img src="${IMG_DIR}${p[0]}-s.jpg" alt="${esc(p[2])}" decoding="async"></div><div class="cap">${esc(p[2])}<span>${+p[1].slice(0,2)}月${+p[1].slice(3)}日 无人机航拍</span></div></button>`).join("");
+  const days = [...new Set(PHOTOS.filter(p => p[4] !== "aerial").map(p => p[1]))];
+  let flat = 0;
+  $("photoFeed").innerHTML = `<div class="sub-head" style="margin-top:34px">现场照片<small>${PHOTOS.filter(p => p[4] !== "aerial").length} 张，8月16日至9月11日，拍摄时间以照片水印为准</small></div>` +
+    days.map(d => {
+      const ps = PHOTOS.map((p, i) => ({ p, i })).filter(o => o.p[1] === d && o.p[4] !== "aerial");
+      return `<div class="photo-day"><h4>${+d.slice(0,2)}月${+d.slice(3)}日<small>${ps.length} 张</small></h4><div class="photos">` +
+        ps.map(({p, i}) => `<button class="ph ${ps.length <= 2 && p[3] !== "tall" ? "wide" : p[3]}" data-ph="${i}"><div class="img"><img src="${IMG_DIR}${p[0]}-s.jpg" alt="${esc(p[2])}" loading="lazy" decoding="async"></div><div class="cap">${esc(p[2])}</div></button>`).join("") +
+        `</div></div>`;
+    }).join("");
+}
+
+let lbIdx = 0;
+function openLb(i) {
+  lbIdx = (i + PHOTOS.length) % PHOTOS.length;
+  const p = PHOTOS[lbIdx];
+  $("lbImg").src = IMG_DIR + p[0] + ".jpg"; $("lbImg").alt = p[2];
+  $("lbCap").textContent = `${+p[1].slice(0,2)}月${+p[1].slice(3)}日　${p[2]}　(${lbIdx+1}/${PHOTOS.length})`;
+  $("lb").classList.add("show");
+}
+const closeLb = () => $("lb").classList.remove("show");
+
+/* ---------- 节点 ---------- */
+function renderNodes() {
+  const nextI = NODES.findIndex(n => d2n(n[0]) >= D);
+  $("timeline").innerHTML = NODES.map((n, i) => {
+    const dn = d2n(n[0]), diff = dn - D;
+    const cls = dn < D ? "past" : i === nextI ? "next" : "";
+    const cd = dn < D ? `<span class="cd done">已过 ${-diff} 天</span>` : diff === 0 ? `<span class="cd soon">今天</span>` : `<span class="cd ${diff <= 7 ? "soon" : "later"}">还有 ${diff} 天</span>`;
+    const dt = new Date(dn*DAY);
+    return `<div class="node ${cls}"><div class="when num">${dt.getUTCMonth()+1}/${dt.getUTCDate()}<small>${dt.getUTCFullYear()}</small></div>
+      <div class="rail"><span class="pin"></span></div>
+      <div class="what"><b>${esc(n[1])}</b>${n[2] ? `<span>${esc(n[2])}</span><br>` : ""}${cd}</div></div>`;
+  }).join("");
+}
+
+/* ---------- 交互 ---------- */
+function renderAll() { renderToday(); renderSlip(); renderGantt(); renderTable(); renderNodes(); }
+function setDate(n) {
+  D = clamp(n, P0, P1);
+  try { const u = new URL(location.href); if (D === TODAY) u.searchParams.delete("d"); else u.searchParams.set("d", n2iso(D)); history.replaceState(null, "", u); } catch(e) {}
+  renderAll();
+}
+function showPage(p) {
+  if (!document.getElementById("page-" + p)) p = "today";
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.page === p));
+  document.querySelectorAll(".page").forEach(s => s.classList.toggle("active", s.id === "page-" + p));
+  if (p === "plan") renderGantt();
+}
+document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => {
+  history.replaceState(null, "", "#" + b.dataset.page); showPage(b.dataset.page); window.scrollTo({ top: 0 });
+}));
+document.querySelectorAll("[data-step]").forEach(b => b.addEventListener("click", () => setDate(D + +b.dataset.step)));
+$("dateInput").addEventListener("change", e => { if (e.target.value) setDate(d2n(e.target.value)); });
+$("btnToday").addEventListener("click", () => setDate(TODAY));
+$("toolbar").addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if (!c) return;
+  if (c.dataset.f) { filter = c.dataset.f; document.querySelectorAll("[data-f]").forEach(x => x.classList.toggle("on", x === c)); }
+  if (c.dataset.r) { range = c.dataset.r; document.querySelectorAll("[data-r]").forEach(x => x.classList.toggle("on", x === c)); }
+  renderGantt();
+});
+$("aerial").addEventListener("click", e => { const b = e.target.closest("[data-ph]"); if (b) openLb(+b.dataset.ph); });
+$("photoFeed").addEventListener("click", e => { const b = e.target.closest("[data-ph]"); if (b) openLb(+b.dataset.ph); });
+$("lb").addEventListener("click", e => {
+  const a = e.target.closest("[data-lb]");
+  if (a) { a.dataset.lb === "close" ? closeLb() : openLb(lbIdx + (a.dataset.lb === "next" ? 1 : -1)); }
+  else if (e.target.id === "lb") closeLb();
+});
+document.addEventListener("keydown", e => {
+  if (!$("lb").classList.contains("show")) return;
+  if (e.key === "Escape") closeLb(); if (e.key === "ArrowRight") openLb(lbIdx + 1); if (e.key === "ArrowLeft") openLb(lbIdx - 1);
+});
+// 甘特悬停提示
+const tipEl = $("tip");
+document.addEventListener("mousemove", e => {
+  const el = e.target.closest("[data-tip]");
+  if (!el) { tipEl.classList.remove("show"); return; }
+  const parts = el.dataset.tip.split("|");
+  tipEl.innerHTML = `<b>${esc(parts[0])}</b>` + parts.slice(1).map(s => `<div>${esc(s)}</div>`).join("");
+  const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  tipEl.style.left = Math.min(window.innerWidth - w - 12, e.clientX + 14) + "px";
+  tipEl.style.top = (e.clientY + h + 20 > window.innerHeight ? e.clientY - h - 12 : e.clientY + 16) + "px";
+  tipEl.classList.add("show");
+});
+
+renderAll();
+renderBarns();
+showPage((location.hash || "#today").slice(1));
+window.addEventListener("hashchange", () => showPage((location.hash || "#today").slice(1)));
+</script>
+</body>
+</html>
