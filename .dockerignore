@@ -1,0 +1,7 @@
+# 构建镜像时不复制这些（依赖在镜像内重新安装，避免本机旧版 node_modules 覆盖）
+node_modules
+.git
+.DS_Store
+*.bak
+*.bak.*
+*.tar.gz
