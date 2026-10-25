@@ -1,11 +1,21 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const multer = require('multer');
 const store = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// 后台密码：只从环境变量 ADMIN_TOKEN 读取（Render 控制台 → Environment 里设置），代码里不写密码
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+function isAdmin(req) {
+  if (ADMIN_TOKEN.length < 12) return false; // 没设置或太短 → 后台一律拒绝
+  const given = Buffer.from(String(req.query.token || ''));
+  const expected = Buffer.from(ADMIN_TOKEN);
+  return given.length === expected.length && crypto.timingSafeEqual(given, expected);
+}
 
 // 注入环境变量到前端（高德地图 Key 等）
 function injectEnv(html) {
@@ -140,8 +150,7 @@ app.get('/api/list', async (req, res) => {
 
 // 管理员：获取全部详情（含联系方式）
 app.get('/api/admin/all', async (req, res) => {
-  const token = req.query.token;
-  if (token !== 'zhizhuxiang2026') {
+  if (!isAdmin(req)) {
     return res.status(401).json({ success: false, message: 'unauthorized' });
   }
   try {
@@ -155,8 +164,7 @@ app.get('/api/admin/all', async (req, res) => {
 
 // 管理员：标记已联系
 app.post('/api/admin/contacted', async (req, res) => {
-  const token = req.query.token;
-  if (token !== 'zhizhuxiang2026') {
+  if (!isAdmin(req)) {
     return res.status(401).json({ success: false, message: 'unauthorized' });
   }
   try {
@@ -175,8 +183,7 @@ app.post('/api/admin/contacted', async (req, res) => {
 
 // 管理员：删除提交
 app.post('/api/admin/delete', async (req, res) => {
-  const token = req.query.token;
-  if (token !== 'zhizhuxiang2026') {
+  if (!isAdmin(req)) {
     return res.status(401).json({ success: false, message: 'unauthorized' });
   }
   try {
@@ -223,7 +230,9 @@ async function start() {
     console.log(`\n  🐷 智猪侠 · 托猪所联盟`);
     console.log(`  ─────────────────────────`);
     console.log(`  收录页:  http://localhost:${PORT}`);
-    console.log(`  管理后台: http://localhost:${PORT}/admin?token=zhizhuxiang2026`);
+    console.log(ADMIN_TOKEN.length >= 12
+      ? `  管理后台: http://localhost:${PORT}/admin?token=（你的 ADMIN_TOKEN）`
+      : `  ⚠️  未设置 ADMIN_TOKEN（至少 12 位），管理后台已关闭`);
     console.log(`  ─────────────────────────\n`);
   });
 }
